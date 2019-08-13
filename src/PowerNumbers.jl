@@ -1,13 +1,14 @@
 module PowerNumbers
 
-using Base, DualNumbers, DomainSets, LinearAlgebra, SingularIntegralEquations
+using Base, DualNumbers, DomainSets, LinearAlgebra, SingularIntegralEquations, SingularIntegralEquations.HypergeometricFunctions
 
-import Base: convert, *, +, -, ==, <, <=, >, |, !, !=, >=, /, ^, \, isinf, in
-import Base: exp, atanh, log1p, abs, max, min, cbrt, log, inv, real, imag, abs, conj
+import Base: convert, *, +, -, ==, <, <=, >, |, !, !=, >=, /, ^, \, isinf, in, isapprox
+import Base: exp, atanh, log1p, abs, max, min, log, inv, real, imag, abs, conj, sqrt
 
 import DualNumbers: Dual, realpart, epsilon, dual
 import DomainSets: UnionDomain, TypedEndpointsInterval
-import SingularIntegralEquations: Directed
+import SingularIntegralEquations: Directed, undirected
+import SingularIntegralEquations.HypergeometricFunctions: speciallog
 
 export PowerNumber, LogNumber
 
@@ -55,13 +56,16 @@ function +(x::PowerNumber, y::PowerNumber)
     coeff = [b, d]
     alphs = [α, β]
     for γ in sort(alphs)
-        tot = coeff ⋅ (alphs .≈ γ)
+        tot = sum(coeff .* (alphs .≈ γ))
         if tot != 0
             return PowerNumber(a+c,tot,γ)
         end
     end
     return PowerNumber(a+c,0,1)
 end
+
++(x::PowerNumber, y::Number) = PowerNumber(realpart(x)+y,epsilon(x), alpha(x))
++(y::Number, x::PowerNumber) = PowerNumber(realpart(x)+y,epsilon(x), alpha(x))
 
 function *(x::PowerNumber, y::PowerNumber)
     a, b, α = realpart(x), epsilon(x), alpha(x)
@@ -73,12 +77,19 @@ function *(x::PowerNumber, y::PowerNumber)
     end
 end
 
+for Typ in (:Bool, :Number)
+    @eval begin
+        *(x::PowerNumber, y::$Typ) = PowerNumber(realpart(x)*y, epsilon(x)*y, alpha(x))
+        *(y::$Typ, x::PowerNumber) = PowerNumber(realpart(x)*y, epsilon(x)*y, alpha(x))
+    end
+end
+
 -(x::PowerNumber) = PowerNumber(-realpart(x), -epsilon(x), alpha(x))
 -(x::PowerNumber, y::PowerNumber) = +(x, -y)
 
 function inv(z::PowerNumber)
     x, y, α = realpart(z), epsilon(z), alpha(z)
-    α > 0.0 ? PowerNumber(1/x,-y/(x^2),α) : PowerNumber(0,1/y,-α) 
+    (α > 0.0 && x!=0) ? PowerNumber(1/x,-y/(x^2),α) : PowerNumber(0,1/y,-α) 
 end
 
 /(z::PowerNumber, x::PowerNumber) = z*inv(x)
@@ -92,10 +103,8 @@ for OP in (:*, :+, :-, :/)
     end
 end
 
-# loses sign information
-for f in (:real, :imag, :abs)
-    @eval $f(z::PowerNumber) = $f(realpart(z))
-end
+==(a::PowerNumber, b::PowerNumber) = realpart(a) == realpart(b) && epsilon(a) == epsilon(b) && alpha(a) == alpha(b)
+isapprox(a::PowerNumber, b::PowerNumber; opts...) = ≈(realpart(a), realpart(b); opts...) && ≈(epsilon(a), epsilon(b); opts...) && ≈(alpha(a), alpha(b); opts...)
 
 function log(z::PowerNumber)
     x, y, α = realpart(z), epsilon(z), alpha(z)
@@ -107,29 +116,31 @@ end
 function atanh(z::PowerNumber)
     x, y, α = realpart(z), epsilon(z), alpha(z)
     if x ≈ 1
-        LogNumber(-α/2,log(2)/2  - log(y))
+        LogNumber(-α/2,log(2)/2  - log(-y)/2)
     elseif x ≈ -1
-        LogNumber(α/2,-log(2)/2  + log(y))
+        LogNumber(α/2,-log(2)/2  + log(y)/2)
     else
-        error("Not implemented for $z")
+        error("Not implemented for $z away from 1, -1")
     end
 end
 
 log1p(z::PowerNumber) = log(z+1)
 
-#=
-SingularIntegralEquations.HypergeometricFunctions.speciallog(x::RiemannDual{<:Complex}) =
-    (s = sqrt(x); 3(atanh(s)-realpart(s))/realpart(s)^3)
+for op in (:real, :imag, :conj)
+    @eval $op(l::PowerNumber) = PowerNumber($op(realpart(l)), $op(epsilon(l)), alpha(l))
+end
 
-function speciallog(x::RiemannDual{<:Real})
-    if x > 0 
-        s = sqrt(x)
-        3(atanh(s)-s)/s^3
-    elseif x < 0
-        s = sqrt(-x)
-        3(s-atan(s))/s^3
-    end
-end=#  
+function sqrt(z::PowerNumber)
+    x, y, α = realpart(z), epsilon(z), alpha(z)
+    (x!=0) ? PowerNumber(sqrt(x),y/(2*sqrt(x)),α) : PowerNumber(0,sqrt(y),α/2) 
+end
+
+#speciallog(x::PowerNumber{<:Complex}) = alpha(x) == 1.0 ? (s = sqrt(x); 3(atanh(s)-realpart(s))/realpart(s)^3) : error("Only implemented for alpha = 1")
+
+function SingularIntegralEquations.HypergeometricFunctions.speciallog(x::PowerNumber)
+    alpha(x) != 1.0 ? error("Only implemented for alpha = 1") : s = sqrt(x)
+    return 3(atanh(s)-realpart(s))/realpart(s)^3
+end
 
 Base.show(io::IO, x::PowerNumber) = print(io, "($(realpart(x))) + ($(epsilon(x)))ε^$(alpha(x))")
 
