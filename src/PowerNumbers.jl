@@ -3,7 +3,7 @@ module PowerNumbers
 using Base, DualNumbers, DomainSets, LinearAlgebra, SingularIntegralEquations, SingularIntegralEquations.HypergeometricFunctions
 
 import Base: convert, *, +, -, ==, <, <=, >, |, !, !=, >=, /, ^, \, isinf, in, isapprox
-import Base: exp, atanh, log1p, abs, max, min, log, inv, real, imag, abs, conj, sqrt
+import Base: exp, atanh, log1p, abs, max, min, log, inv, real, imag, conj, sqrt
 
 import DualNumbers: Dual, realpart, epsilon, dual
 import DomainSets: UnionDomain, TypedEndpointsInterval
@@ -34,8 +34,8 @@ Base.promote_rule(::Type{PowerNumber}, ::Type{<:Number}) = PowerNumber
 Base.convert(::Type{PowerNumber}, z::PowerNumber) = z
 Base.convert(::Type{PowerNumber}, z::Number) = PowerNumber(0, z, 0)
 
-undirected(r::PowerNumber) = undirected(realpart(r))
-isrealinf(r::PowerNumber) = isinf(realpart(r))
+undirected(r::PowerNumber) = alpha(r) < 0.0 ? Inf : undirected(realpart(r))
+isinf(r::PowerNumber) = isinf(realpart(r)) || alpha(r) < 0.0
 
 PowerNumber(x::Dual) = PowerNumber(realpart(x), epsilon(x), 1)
 Dual(x::PowerNumber) = alpha(x) == 1 ? Dual(realpart(x), epsilon(x)) : throw("α must equal 1 to convert to dual.")
@@ -109,8 +109,10 @@ isapprox(a::PowerNumber, b::PowerNumber; opts...) = ≈(realpart(a), realpart(b)
 function log(z::PowerNumber)
     x, y, α = realpart(z), epsilon(z), alpha(z)
     tol = 1E-14
-    abs(x) ≤ tol  || abs(x) ≥ 1/tol || throw(ArgumentError("Cannot eval at $z"))
-    LogNumber(abs(x) ≤ tol ? α : -α, log(y))
+    if abs(x) ≤ tol || α < 0.0
+        return LogNumber(α,log(y))
+    else throw(ArgumentError("Cannot eval at $z"))
+    end
 end
 
 function atanh(z::PowerNumber)
@@ -120,7 +122,7 @@ function atanh(z::PowerNumber)
     elseif x ≈ -1
         LogNumber(α/2,-log(2)/2  + log(y)/2)
     else
-        error("Not implemented for $z away from 1, -1")
+        atanh(x)
     end
 end
 
@@ -130,15 +132,22 @@ for op in (:real, :imag, :conj)
     @eval $op(l::PowerNumber) = PowerNumber($op(realpart(l)), $op(epsilon(l)), alpha(l))
 end
 
+abs(l::PowerNumber) = abs(realpart(l))
+
 function sqrt(z::PowerNumber)
     x, y, α = realpart(z), epsilon(z), alpha(z)
     (x!=0) ? PowerNumber(sqrt(x),y/(2*sqrt(x)),α) : PowerNumber(0,sqrt(y),α/2) 
 end
 
+function ^(z::PowerNumber, p::Number)
+    x, y, α = realpart(z), epsilon(z), alpha(z)
+    (x!=0) ? error("Not implemented.") : PowerNumber(0,y^p,α*p) 
+end
+
 #speciallog(x::PowerNumber{<:Complex}) = alpha(x) == 1.0 ? (s = sqrt(x); 3(atanh(s)-realpart(s))/realpart(s)^3) : error("Only implemented for alpha = 1")
 
 function SingularIntegralEquations.HypergeometricFunctions.speciallog(x::PowerNumber)
-    alpha(x) != 1.0 ? error("Only implemented for alpha = 1") : s = sqrt(x)
+    s = sqrt(x)
     return 3(atanh(s)-realpart(s))/realpart(s)^3
 end
 
