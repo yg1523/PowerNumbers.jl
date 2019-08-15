@@ -111,9 +111,13 @@ function log(z::PowerNumber)
     tol = 1E-14
     if abs(x) ≤ tol || α < 0.0
         return LogNumber(α,log(y))
+    elseif abs(x) >= 1/tol
+        return LogNumber(-α,log(y))
     else throw(ArgumentError("Cannot eval at $z"))
     end
 end
+
+Complex{Float64}(a::LogNumber) = a(1)
 
 function atanh(z::PowerNumber)
     x, y, α = realpart(z), epsilon(z), alpha(z)

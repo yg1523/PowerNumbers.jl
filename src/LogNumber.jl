@@ -18,6 +18,8 @@ Base.convert(::Type{LogNumber}, z::Number) = LogNumber(0, z)
 
 ==(a::LogNumber, b::LogNumber) = logpart(a) == logpart(b) && finitepart(a) == finitepart(b)
 Base.isapprox(a::LogNumber, b::LogNumber; opts...) = ≈(logpart(a), logpart(b); opts...) && ≈(finitepart(a), finitepart(b); opts...)
+Base.isapprox(a::LogNumber, b::Number; opts...) = ≈(a(1),b; opts...)
+Base.isapprox(a::Number, b::LogNumber; opts...) = ≈(a,b(1); opts...)
 
 (l::LogNumber)(ε) = logpart(l)*log(ε) + finitepart(l)
 
