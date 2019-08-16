@@ -1,13 +1,11 @@
 module PowerNumbers
 
-using Base, DualNumbers, DomainSets, LinearAlgebra, SingularIntegralEquations, SingularIntegralEquations.HypergeometricFunctions
+using Base, DualNumbers, LinearAlgebra, SingularIntegralEquations.HypergeometricFunctions
 
 import Base: convert, *, +, -, ==, <, <=, >, |, !, !=, >=, /, ^, \, isinf, in, isapprox
 import Base: exp, atanh, log1p, abs, max, min, log, inv, real, imag, conj, sqrt, sin, cos
 
 import DualNumbers: Dual, realpart, epsilon, dual
-import DomainSets: UnionDomain, TypedEndpointsInterval
-import SingularIntegralEquations: Directed, undirected
 import SingularIntegralEquations.HypergeometricFunctions: speciallog
 
 export PowerNumber, LogNumber, alpha, realpart, logpart, epsilon
@@ -46,9 +44,6 @@ function (x::PowerNumber)(ε)
     isinf(a) && return b/(ε^α)
     realpart(x) + epsilon(x)*ε^α
 end
-
-in(x::PowerNumber, d::Domain) = realpart(x) ∈ d
-in(x::PowerNumber, d::TypedEndpointsInterval{:closed,:closed}) = realpart(x) ∈ d
 
 function +(x::PowerNumber, y::PowerNumber)
     a, b, α = realpart(x), epsilon(x), alpha(x)
@@ -96,13 +91,6 @@ end
 /(z::PowerNumber, x::Number) = z*inv(x)
 /(x::Number, z::PowerNumber) = x*inv(z)
 
-for OP in (:*, :+, :-, :/)
-    @eval begin
-        $OP(a::Directed{s}, b::PowerNumber) where {s} = Directed{s}($OP(a.x,b))
-        $OP(a::PowerNumber, b::Directed{s}) where {s} = Directed{s}($OP(a,b.x))
-    end
-end
-
 ==(a::PowerNumber, b::PowerNumber) = realpart(a) == realpart(b) && epsilon(a) == epsilon(b) && alpha(a) == alpha(b)
 isapprox(a::PowerNumber, b::PowerNumber; opts...) = ≈(realpart(a), realpart(b); opts...) && ≈(epsilon(a), epsilon(b); opts...) && ≈(alpha(a), alpha(b); opts...)
 
@@ -142,17 +130,6 @@ function sqrt(z::PowerNumber)
     x, y, α = realpart(z), epsilon(z), alpha(z)
     (x!=0) ? PowerNumber(sqrt(x),y/(2*sqrt(x)),α) : PowerNumber(0,sqrt(y),α/2) 
 end
-
-#=
-function ^(z::PowerNumber, p::Number)
-    x, y, α = realpart(z), epsilon(z), alpha(z)
-    if typeof(p) <: Integer
-        return ^(z::Number, p::Integer)
-    end
-    (x!=0) ? error("Not implemented.") : PowerNumber(0,y^p,α*p) 
-end
-=#
-
 
 # Analytic functions are trivial
 for op in (:cos, :sin, :exp) # TODO: use same list as in Dual Numbers

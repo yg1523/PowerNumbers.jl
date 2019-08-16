@@ -1,5 +1,4 @@
 using PowerNumbers, Test, SingularIntegralEquations, SingularIntegralEquations.HypergeometricFunctions
-import SingularIntegralEquations: Directed, undirected
 import PowerNumbers: PowerNumber, LogNumber, realpart, epsilon, alpha
 import SingularIntegralEquations.HypergeometricFunctions: speciallog
 
@@ -27,23 +26,11 @@ import SingularIntegralEquations.HypergeometricFunctions: speciallog
 
     z = PowerNumber(1,2,1)
     @test 1/(1-z(h)) ≈ (1/(1-z))(h) rtol=0.0001
-end 
-
-@testset "Directed -> PowerNumbers" begin
-    @test undirected(Directed{false}(PowerNumber(0,-1, 1))) ≈ 0
 
     @test real(LogNumber(2im,im+1)) == LogNumber(0,1)
     @test imag(LogNumber(2im,im+1)) == LogNumber(2,1)
     @test conj(LogNumber(2im,im+1)) == LogNumber(-2im,1-im)
 
-    @test log(Directed{false}(PowerNumber(0,-1, 1))) ≈ LogNumber(1,π*im)
-    @test log(Directed{true}(PowerNumber(0,-1, 1))) ≈ LogNumber(1,-π*im)
-
-    @test log(Directed{false}(PowerNumber(0,-1-eps()*im,1))) ≈ LogNumber(1,π*im)
-    @test log(Directed{false}(PowerNumber(0,-1+eps()*im,1))) ≈ LogNumber(1,π*im)
-
-    @test log(Directed{true}(PowerNumber(0,-1-eps()*im,1))) ≈ LogNumber(1,-π*im)
-    @test log(Directed{true}(PowerNumber(0,-1+eps()*im,1))) ≈ LogNumber(1,-π*im)
 end
 
 @testset "PowerNumbers arithmetic" begin
