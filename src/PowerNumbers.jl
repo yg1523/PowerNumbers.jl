@@ -13,9 +13,9 @@ export PowerNumber, LogNumber, alpha, realpart, logpart, epsilon
 include("LogNumber.jl")
 
 struct PowerNumber <: Number
-    realpart::ComplexF64
-    epsilon::ComplexF64
-    alpha::Float64
+    realpart::Number
+    epsilon::Number
+    alpha::Real
 
     PowerNumber(realpart,epsilon,alpha) = 
     alpha >= 2.0 ? new(realpart,0,1) :
