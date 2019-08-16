@@ -10,7 +10,7 @@ import DomainSets: UnionDomain, TypedEndpointsInterval
 import SingularIntegralEquations: Directed, undirected
 import SingularIntegralEquations.HypergeometricFunctions: speciallog
 
-export PowerNumber, LogNumber
+export PowerNumber, LogNumber, alpha, realpart, logpart, epsilon
 
 include("LogNumber.jl")
 
@@ -143,10 +143,15 @@ function sqrt(z::PowerNumber)
     (x!=0) ? PowerNumber(sqrt(x),y/(2*sqrt(x)),α) : PowerNumber(0,sqrt(y),α/2) 
 end
 
+#=
 function ^(z::PowerNumber, p::Number)
     x, y, α = realpart(z), epsilon(z), alpha(z)
+    if typeof(p) <: Integer
+        return ^(z::Number, p::Integer)
+    end
     (x!=0) ? error("Not implemented.") : PowerNumber(0,y^p,α*p) 
 end
+=#
 
 #speciallog(x::PowerNumber{<:Complex}) = alpha(x) == 1.0 ? (s = sqrt(x); 3(atanh(s)-realpart(s))/realpart(s)^3) : error("Only implemented for alpha = 1")
 

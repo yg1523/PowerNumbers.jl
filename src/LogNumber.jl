@@ -6,25 +6,25 @@ end
 
 
 @inline logpart(z::Number) = zero(z)
-@inline finitepart(z::Number) = z
+@inline realpart(z::Number) = z
 
 @inline logpart(l::LogNumber) = l.s
-@inline finitepart(l::LogNumber) = l.c
+@inline realpart(l::LogNumber) = l.c
 
 
 Base.promote_rule(::Type{LogNumber}, ::Type{<:Number}) = LogNumber
 Base.convert(::Type{LogNumber}, z::LogNumber) = z
 Base.convert(::Type{LogNumber}, z::Number) = LogNumber(0, z)
 
-==(a::LogNumber, b::LogNumber) = logpart(a) == logpart(b) && finitepart(a) == finitepart(b)
-Base.isapprox(a::LogNumber, b::LogNumber; opts...) = ≈(logpart(a), logpart(b); opts...) && ≈(finitepart(a), finitepart(b); opts...)
+==(a::LogNumber, b::LogNumber) = logpart(a) == logpart(b) && realpart(a) == realpart(b)
+Base.isapprox(a::LogNumber, b::LogNumber; opts...) = ≈(logpart(a), logpart(b); opts...) && ≈(realpart(a), realpart(b); opts...)
 Base.isapprox(a::LogNumber, b::Number; opts...) = ≈(a(1),b; opts...)
 Base.isapprox(a::Number, b::LogNumber; opts...) = ≈(a,b(1); opts...)
 
-(l::LogNumber)(ε) = logpart(l)*log(ε) + finitepart(l)
+(l::LogNumber)(ε) = logpart(l)*log(ε) + realpart(l)
 
 for op in (:real, :imag, :conj)
-    @eval $op(l::LogNumber) = LogNumber($op(logpart(l)), $op(finitepart(l)))
+    @eval $op(l::LogNumber) = LogNumber($op(logpart(l)), $op(realpart(l)))
 end
 
 for f in (:+, :-)
@@ -57,4 +57,4 @@ function exp(l::LogNumber)::ComplexF64
     end
 end
 
-Base.show(io::IO, x::LogNumber) = print(io, "($(logpart(x)))log ε + $(finitepart(x))")
+Base.show(io::IO, x::LogNumber) = print(io, "($(logpart(x)))log ε + $(realpart(x))")
