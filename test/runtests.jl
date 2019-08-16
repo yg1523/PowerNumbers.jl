@@ -102,3 +102,9 @@ end
     tot = sum(coeff .* (alphs .≈ γ))
     end
 end
+
+@testset "sin" begin
+	ε = PowerNumber(0,1,1)
+	@test_broken sin(sqrt(ε))^2 === PowerNumber(0.0,1.0,1.0)	
+	@test sin(sqrt(ε))^2.0 === PowerNumber(0.0,1.0,1.0)
+end

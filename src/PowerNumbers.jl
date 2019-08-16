@@ -3,7 +3,7 @@ module PowerNumbers
 using Base, DualNumbers, DomainSets, LinearAlgebra, SingularIntegralEquations, SingularIntegralEquations.HypergeometricFunctions
 
 import Base: convert, *, +, -, ==, <, <=, >, |, !, !=, >=, /, ^, \, isinf, in, isapprox
-import Base: exp, atanh, log1p, abs, max, min, log, inv, real, imag, conj, sqrt
+import Base: exp, atanh, log1p, abs, max, min, log, inv, real, imag, conj, sqrt, sin, cos
 
 import DualNumbers: Dual, realpart, epsilon, dual
 import DomainSets: UnionDomain, TypedEndpointsInterval
@@ -152,6 +152,16 @@ function ^(z::PowerNumber, p::Number)
     (x!=0) ? error("Not implemented.") : PowerNumber(0,y^p,α*p) 
 end
 =#
+
+
+# Analytic functions are trivial
+for op in (:cos, :sin, :exp) # TODO: use same list as in Dual Numbers
+	@eval function $op(z::PowerNumber)
+	    x, y, α = realpart(z), epsilon(z), alpha(z)
+	    fz = $op(dual(x,y))
+	    PowerNumber(realpart(fz), epsilon(fz), α)
+	end
+end
 
 #speciallog(x::PowerNumber{<:Complex}) = alpha(x) == 1.0 ? (s = sqrt(x); 3(atanh(s)-realpart(s))/realpart(s)^3) : error("Only implemented for alpha = 1")
 
