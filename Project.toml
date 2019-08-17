@@ -4,7 +4,6 @@ authors = ["idlemat <52246739+idlemat@users.noreply.github.com>"]
 version = "0.1.0"
 
 [deps]
-DomainSets = "5b8099bc-c8ec-5219-889f-1d9e522a28bf"
 DualNumbers = "fa6b7ba4-c1ee-5f82-b5fc-ecf0adba8f74"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
