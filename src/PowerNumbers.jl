@@ -1,12 +1,11 @@
 module PowerNumbers
 
-using Base, DualNumbers, LinearAlgebra, SingularIntegralEquations.HypergeometricFunctions
+using Base, DualNumbers, LinearAlgebra
 
 import Base: convert, *, +, -, ==, <, <=, >, |, !, !=, >=, /, ^, \, isinf, in, isapprox
 import Base: exp, atanh, log1p, abs, max, min, log, inv, real, imag, conj, sqrt, sin, cos
 
 import DualNumbers: Dual, realpart, epsilon, dual
-import SingularIntegralEquations.HypergeometricFunctions: speciallog
 
 export PowerNumber, LogNumber, alpha, realpart, logpart, epsilon
 
@@ -142,10 +141,10 @@ end
 
 #speciallog(x::PowerNumber{<:Complex}) = alpha(x) == 1.0 ? (s = sqrt(x); 3(atanh(s)-realpart(s))/realpart(s)^3) : error("Only implemented for alpha = 1")
 
-function SingularIntegralEquations.HypergeometricFunctions.speciallog(x::PowerNumber)
-    s = sqrt(x)
-    return 3(atanh(s)-realpart(s))/realpart(s)^3
-end
+# function SingularIntegralEquations.HypergeometricFunctions.speciallog(x::PowerNumber)
+#     s = sqrt(x)
+#     return 3(atanh(s)-realpart(s))/realpart(s)^3
+# end
 
 Base.show(io::IO, x::PowerNumber) = print(io, "($(realpart(x))) + ($(epsilon(x)))ε^$(alpha(x))")
 
