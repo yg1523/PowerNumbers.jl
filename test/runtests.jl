@@ -1,6 +1,6 @@
-using PowerNumbers, Test, SingularIntegralEquations, SingularIntegralEquations.HypergeometricFunctions
+using PowerNumbers, Test#, SingularIntegralEquations.HypergeometricFunctions
 import PowerNumbers: PowerNumber, LogNumber, realpart, epsilon, alpha
-import SingularIntegralEquations.HypergeometricFunctions: speciallog
+#import SingularIntegralEquations.HypergeometricFunctions: speciallog
 
 @testset "RiemannDual -> PowerNumber" begin
     for h in (0.1,0.01), a in (2exp(0.1im),1.1)
@@ -20,9 +20,9 @@ import SingularIntegralEquations.HypergeometricFunctions: speciallog
         @test atanh(z)(h) ≈  atanh(realpart(z)+epsilon(z)h^alpha(z)) atol = 1E-4
     end
 
-    z = PowerNumber(1,-0.25,1)
+    #z = PowerNumber(1,-0.25,1)
     h = 0.0000001
-    @test speciallog(z)(h) ≈ speciallog(realpart(z)+epsilon(z)h) atol=1E-4
+    #@test speciallog(z)(h) ≈ speciallog(realpart(z)+epsilon(z)*h^alpha(z)) atol=1E-4
 
     z = PowerNumber(1,2,1)
     @test 1/(1-z(h)) ≈ (1/(1-z))(h) rtol=0.0001
@@ -31,6 +31,10 @@ import SingularIntegralEquations.HypergeometricFunctions: speciallog
     @test imag(LogNumber(2im,im+1)) == LogNumber(2,1)
     @test conj(LogNumber(2im,im+1)) == LogNumber(-2im,1-im)
 
+end
+
+@testset "Multiplication" begin
+    list = [PowerNumber(0,1,0.5),PowerNumber(0,1,-0.5),PowerNumber(3*im,1,0.2)]
 end
 
 @testset "PowerNumbers arithmetic" begin
@@ -92,6 +96,6 @@ end
 
 @testset "sin" begin
 	ε = PowerNumber(0,1,1)
-	@test_broken sin(sqrt(ε))^2 === PowerNumber(0.0,1.0,1.0)	
+	@test sin(sqrt(ε))^2 === PowerNumber(0.0,1.0,1.0)	
 	@test sin(sqrt(ε))^2.0 === PowerNumber(0.0,1.0,1.0)
 end

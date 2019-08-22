@@ -11,17 +11,18 @@ export PowerNumber, LogNumber, alpha, realpart, logpart, epsilon
 
 include("LogNumber.jl")
 
-struct PowerNumber <: Number
-    realpart::Number
-    epsilon::Number
-    alpha::Real
+struct PowerNumber{T<:Number,V<:Number} <: Number
+    realpart::T
+    epsilon::T
+    alpha::V
 
-    PowerNumber(realpart,epsilon,alpha) = 
-    alpha >= 2.0 ? new(realpart,0,1) :
-    alpha <= -2.0 ? new(Inf,0,1) :
-    alpha ≈ 0 ? new(realpart+epsilon,0,1) :
-    new(realpart,epsilon,alpha)
+    PowerNumber{T,V}(realpart::T,epsilon::T,alpha::V) where {T,V} = 
+    alpha < 0 ? new{T,V}(0,epsilon,alpha) :
+    new{T,V}(realpart,epsilon,alpha)
 end
+
+PowerNumber(r::T, e::T, α::V) where {T,V} = PowerNumber{T,V}(r,e,α)
+PowerNumber(r, e, α) = PowerNumber(promote(r,e)..., α)
 
 realpart(r::PowerNumber) = r.realpart
 epsilon(r::PowerNumber) = r.epsilon
@@ -29,10 +30,7 @@ alpha(r::PowerNumber) = r.alpha
 
 Base.promote_rule(::Type{PowerNumber}, ::Type{<:Number}) = PowerNumber
 Base.convert(::Type{PowerNumber}, z::PowerNumber) = z
-Base.convert(::Type{PowerNumber}, z::Number) = PowerNumber(0, z, 0)
-
-undirected(r::PowerNumber) = alpha(r) < 0.0 ? Inf : undirected(realpart(r))
-isinf(r::PowerNumber) = isinf(realpart(r)) || alpha(r) < 0.0
+Base.convert(::Type{PowerNumber}, z::Number) = PowerNumber(z, 0, 0)
 
 PowerNumber(x::Dual) = PowerNumber(realpart(x), epsilon(x), 1)
 Dual(x::PowerNumber) = alpha(x) == 1 ? Dual(realpart(x), epsilon(x)) : throw("α must equal 1 to convert to dual.")
@@ -40,8 +38,7 @@ dual(x::PowerNumber) = Dual(x)
 
 function (x::PowerNumber)(ε) 
     a,b,α = realpart(x), epsilon(x), alpha(x)
-    isinf(a) && return b/(ε^α)
-    realpart(x) + epsilon(x)*ε^α
+    a + b*ε^α
 end
 
 function +(x::PowerNumber, y::PowerNumber)
@@ -49,13 +46,9 @@ function +(x::PowerNumber, y::PowerNumber)
     c, d, β = realpart(y), epsilon(y), alpha(y)
     coeff = [b, d]
     alphs = [α, β]
-    for γ in sort(alphs)
-        tot = sum(coeff .* (alphs .≈ γ))
-        if tot != 0
-            return PowerNumber(a+c,tot,γ)
-        end
-    end
-    return PowerNumber(a+c,0,1)
+    γ = minimum(alphs)
+    tot = sum(coeff .* (alphs .≈ γ))
+    return PowerNumber(a+c,tot,γ)
 end
 
 +(x::PowerNumber, y::Number) = PowerNumber(realpart(x)+y,epsilon(x), alpha(x))
@@ -64,12 +57,18 @@ end
 function *(x::PowerNumber, y::PowerNumber)
     a, b, α = realpart(x), epsilon(x), alpha(x)
     c, d, β = realpart(y), epsilon(y), alpha(y)
-    if α+β ≈ 0
-        return PowerNumber(a*c,b*c,α) + PowerNumber(b*d,a*d,β) 
-    else
-        return PowerNumber(a*c,b*c,α) + PowerNumber(0,a*d,β) + PowerNumber(0,b*d,α+β)
+    coeff = [a*c, b*c, a*d, b*d]
+    alphs = [0, α, β, α+β]
+    N1 = PowerNumber(0,b*c,α)
+    N2 = PowerNumber(0,a*d,β)
+    N3 = PowerNumber(0,b*d,α+β)
+    if a==0 && c==0 return N3
+    elseif a==0 return N1 + N3
+    elseif c==0 return N2 + N3
+    else return a*c + N1 + N2 + N3
     end
 end
+
 
 for Typ in (:Bool, :Number)
     @eval begin
@@ -80,6 +79,8 @@ end
 
 -(x::PowerNumber) = PowerNumber(-realpart(x), -epsilon(x), alpha(x))
 -(x::PowerNumber, y::PowerNumber) = +(x, -y)
+-(x::PowerNumber, y::Number) = PowerNumber(realpart(x)-y,epsilon(x), alpha(x))
+-(y::Number, x::PowerNumber) = PowerNumber(y-realpart(x),-epsilon(x), alpha(x))
 
 function inv(z::PowerNumber)
     x, y, α = realpart(z), epsilon(z), alpha(z)
@@ -137,6 +138,12 @@ for op in (:cos, :sin, :exp) # TODO: use same list as in Dual Numbers
 	    fz = $op(dual(x,y))
 	    PowerNumber(realpart(fz), epsilon(fz), α)
 	end
+end
+
+^(z::PowerNumber, p::Integer) = invoke(^, Tuple{Number,Integer}, z, p)
+function ^(z::PowerNumber, p::Number)
+    x, y, α = realpart(z), epsilon(z), alpha(z)
+    (x!=0) ? PowerNumber(x^p,p*y*x^(p-1),α) : PowerNumber(0,y^p,α*p)
 end
 
 #speciallog(x::PowerNumber{<:Complex}) = alpha(x) == 1.0 ? (s = sqrt(x); 3(atanh(s)-realpart(s))/realpart(s)^3) : error("Only implemented for alpha = 1")

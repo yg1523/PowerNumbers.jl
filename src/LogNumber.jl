@@ -5,8 +5,8 @@ struct LogNumber <: Number
 end
 
 
-@inline logpart(z::Number) = zero(z)
-@inline realpart(z::Number) = z
+#@inline logpart(z::Number) = zero(z)
+#@inline realpart(z::Number) = z
 
 @inline logpart(l::LogNumber) = l.s
 @inline realpart(l::LogNumber) = l.c
