@@ -7,50 +7,52 @@ import Base: exp, atanh, log1p, abs, max, min, log, inv, real, imag, conj, sqrt,
 
 import DualNumbers: Dual, realpart, epsilon, dual
 
-export PowerNumber, LogNumber, alpha, realpart, logpart, epsilon
+export PowerNumber, LogNumber
 
 include("LogNumber.jl")
 
 struct PowerNumber{T<:Number,V<:Number} <: Number
-    realpart::T
-    epsilon::T
-    alpha::V
-
-    PowerNumber{T,V}(realpart::T,epsilon::T,alpha::V) where {T,V} = 
-    alpha < 0 ? new{T,V}(0,epsilon,alpha) :
-    new{T,V}(realpart,epsilon,alpha)
+    A::T
+    B::T
+    α::V
+    β::V
+    PowerNumber{T,V}(A,B,α,β) where {T<:Number,V<:Number} = α >= β ? error("Must have α<β") : new{T,V}(A,B,α,β)
 end
 
-PowerNumber(r::T, e::T, α::V) where {T,V} = PowerNumber{T,V}(r,e,α)
-PowerNumber(r, e, α) = PowerNumber(promote(r,e)..., α)
-
-realpart(r::PowerNumber) = r.realpart
-epsilon(r::PowerNumber) = r.epsilon
-alpha(r::PowerNumber) = r.alpha
+PowerNumber(a::T, b::T, c::V, d::V) where {T,V} = PowerNumber{T,V}(a,b,c,d)
+PowerNumber(a,b,c,d) = PowerNumber(promote(a,b)..., promote(c,d)...)
 
 Base.promote_rule(::Type{PowerNumber}, ::Type{<:Number}) = PowerNumber
 Base.convert(::Type{PowerNumber}, z::PowerNumber) = z
-Base.convert(::Type{PowerNumber}, z::Number) = PowerNumber(z, 0, 0)
+Base.convert(::Type{PowerNumber}, z::Number) = PowerNumber(z, 0, 0, Inf)
 
-PowerNumber(x::Dual) = PowerNumber(realpart(x), epsilon(x), 1)
-Dual(x::PowerNumber) = alpha(x) == 1 ? Dual(realpart(x), epsilon(x)) : throw("α must equal 1 to convert to dual.")
+apart(z::PowerNumber) = z.A
+bpart(z::PowerNumber) = z.B
+alpha(z::PowerNumber) = z.α
+beta(z::PowerNumber) = z.β
+
+PowerNumber(x::Dual) = PowerNumber(realpart(x), epsilon(x), 0, 1)
+Dual(x::PowerNumber) = alpha(x) == 0 && beta(x) == 1 ? Dual(apart(x), bpart(x)) : throw("α, β must equal 0, 1 to convert to dual.")
 dual(x::PowerNumber) = Dual(x)
 
 function (x::PowerNumber)(ε) 
-    a,b,α = realpart(x), epsilon(x), alpha(x)
-    a + b*ε^α
+    a,b,p,q = apart(x),bpart(x),alpha(x),beta(x)
+    a*ε^p + b*ε^q
 end
 
 function +(x::PowerNumber, y::PowerNumber)
-    a, b, α = realpart(x), epsilon(x), alpha(x)
-    c, d, β = realpart(y), epsilon(y), alpha(y)
-    coeff = [b, d]
-    alphs = [α, β]
-    γ = minimum(alphs)
-    tot = sum(coeff .* (alphs .≈ γ))
-    return PowerNumber(a+c,tot,γ)
+    a,b,p,q = apart(x),bpart(x),alpha(x),beta(x)
+    c,d,r,s = apart(y),bpart(y),alpha(y),beta(y)
+    coef = [a,b,c,d]
+    exps = [p,q,r,s]
+    γ = sort(exps)[1]
+    tot1 = sum(coef .* (exps .≈ γ))
+    γ ≈ sort(exps)[2] ? δ = sort(exps)[3] : δ = sort(exps)[2] 
+    tot2 = sum(coef .* (exps .≈ δ))
+    return PowerNumber(tot1,tot2,γ,δ)
 end
 
+#=
 +(x::PowerNumber, y::Number) = PowerNumber(realpart(x)+y,epsilon(x), alpha(x))
 +(y::Number, x::PowerNumber) = PowerNumber(realpart(x)+y,epsilon(x), alpha(x))
 
@@ -152,7 +154,7 @@ end
 #     s = sqrt(x)
 #     return 3(atanh(s)-realpart(s))/realpart(s)^3
 # end
-
-Base.show(io::IO, x::PowerNumber) = print(io, "($(realpart(x))) + ($(epsilon(x)))ε^$(alpha(x))")
+=#
+Base.show(io::IO, x::PowerNumber) = print(io, "($(x.A))ε^$(x.α) + ($(x.B))ε^$(x.β)")
 
 end # module
