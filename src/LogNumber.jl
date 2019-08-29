@@ -57,4 +57,6 @@ function exp(l::LogNumber)::ComplexF64
     end
 end
 
+Complex{Float64}(a::LogNumber) = a(1)
+
 Base.show(io::IO, x::LogNumber) = print(io, "($(logpart(x)))log ε + $(realpart(x))")
