@@ -19,13 +19,21 @@ struct PowerNumber{T<:Number,V<:Number} <: Number
     B::T
     α::V
     β::V
-    PowerNumber{T,V}(A,B,α,β) where {T<:Number,V<:Number} = (A,α) == (0,0) ? PowerNumber(B,0,β,Inf) :
-    α >= β ? error("Must have α<β") : new{T,V}(A,B,α,β)
+    PowerNumber{T,V}(A,B,α,β) where {T<:Number,V<:Number} = 
+    if α > β 
+        error("Must have α<=β") 
+    elseif α == β 
+        new{T,V}(0,A+B,β,β)
+    elseif A == 0
+        new{T,V}(0,B,β,β)
+    else
+        new{T,V}(A,B,α,β)
+    end
 end
 
 PowerNumber(a::T, b::T, c::V, d::V) where {T,V} = PowerNumber{T,V}(a,b,c,d)
 PowerNumber(a,b,c,d) = PowerNumber(promote(a,b)..., promote(c,d)...)
-PowerNumber(a,b) = PowerNumber(a,0,b,Inf)
+PowerNumber(a,b) = PowerNumber(0,a,b,b)
 
 apart(z::PowerNumber) = z.A
 bpart(z::PowerNumber) = z.B
@@ -37,31 +45,38 @@ Dual(x::PowerNumber) = alpha(x) == 0 && beta(x) == 1 ? Dual(apart(x), bpart(x)) 
 dual(x::PowerNumber) = Dual(x)
 
 function (x::PowerNumber)(ε) 
-    a,b,p,q = apart(x),bpart(x),alpha(x),beta(x)
-    a*ε^p + b*ε^q
+    a,b,α,β = apart(x),bpart(x),alpha(x),beta(x)
+    a*ε^α + b*ε^β
 end
 
 function +(x::PowerNumber, y::PowerNumber)
-    a,b,p,q = apart(x),bpart(x),alpha(x),beta(x)
-    c,d,r,s = apart(y),bpart(y),alpha(y),beta(y)
+    a,b,α,β = apart(x),bpart(x),alpha(x),beta(x)
+    c,d,γ,δ = apart(y),bpart(y),alpha(y),beta(y)
+    exps = [α,β,γ,δ]
     coef = [a,b,c,d]
-    exps = [p,q,r,s]
-    γ = sort(exps)[1]
-    tot1 = sum(coef .* (exps .≈ γ))
-    γ ≈ sort(exps)[2] ? δ = sort(exps)[3] : δ = sort(exps)[2] 
-    tot2 = sum(coef .* (exps .≈ δ))
-    return PowerNumber(tot1,tot2,γ,δ)
+    list = sort(unique(exps))
+    if length(list) == 1
+        return PowerNumber(sum(coef),list[1]) 
+    end
+    for i in 2:length(list)-1
+        tot1 = sum(coef .* (exps .≈ list[i-1]))
+        tot2 = sum(coef .* (exps .≈ list[i]))
+        if tot2 != 0 
+            return PowerNumber(tot1,tot2,list[i-1],list[i])
+        end
+    end
+    tot1 = sum(coef .* (exps .≈ list[end-1]))
+    tot2 = sum(coef .* (exps .≈ list[end]))
+    return PowerNumber(tot1,tot2,list[end-1],list[end])
 end
 
-+(x::PowerNumber, y::Number) = x + PowerNumber(y,0,0,Inf)
++(x::PowerNumber, y::Number) = x + PowerNumber(0,y,0,0)
 +(y::Number, x::PowerNumber) = +(x::PowerNumber, y::Number)
 
 function *(x::PowerNumber, y::PowerNumber)
-    a,b,p,q = apart(x),bpart(x),alpha(x),beta(x)
-    c,d,r,s = apart(y),bpart(y),alpha(y),beta(y)
-    coeff = [a*c, b*c, a*d]
-    alphs = [p+r, q+r, p+s]
-    return PowerNumber(a*c,b*c,p+r,q+r) + PowerNumber(0,a*d,p+r,p+s)
+    a,b,α,β = apart(x),bpart(x),alpha(x),beta(x)
+    c,d,γ,δ = apart(y),bpart(y),alpha(y),beta(y)
+    return PowerNumber(a*c,α+γ) + PowerNumber(b*c,β+γ) + PowerNumber(a*d,α+δ) + PowerNumber(b*d,β+δ)
 end
 
 *(x::PowerNumber, y::Number) = PowerNumber(y*apart(x),y*bpart(x),alpha(x),beta(x))
@@ -73,8 +88,8 @@ end
 -(y::Number, x::PowerNumber) = +(-x::PowerNumber, y::Number)
 
 function inv(x::PowerNumber)
-    a,b,p,q = apart(x),bpart(x),alpha(x),beta(x)
-    a != 0 ? PowerNumber(1/a,-b*a^(-2),-p,q-2*p) : PowerNumber(1/b,0,-q,-p)
+    a,b,α,β = apart(x),bpart(x),alpha(x),beta(x)
+    a != 0 ? PowerNumber(1/a,-b*a^(-2),-α,β-2*α) : PowerNumber(1/b,-β)
 end
 
 /(z::PowerNumber, x::PowerNumber) = z*inv(x)
@@ -84,6 +99,7 @@ end
 ^(z::PowerNumber, p::Integer) = invoke(^, Tuple{Number,Integer}, z, p)
 function ^(z::PowerNumber, p::Number)
     a,b,α,β = apart(z),bpart(z),alpha(z),beta(z)
+    a == 0 ? PowerNumber(b^p,β*p) :
     PowerNumber(a^p,(a^(p-1))*b*p,p*α,β+(p-1)*α)
 end
 
@@ -119,7 +135,7 @@ functionlist = (:abs2, :log10, :log2, :exp, :exp2, :expm1,
 for op in functionlist
     @eval function $op(z::PowerNumber)
         a,b,α,β = apart(z),bpart(z),alpha(z),beta(z)
-        if α == 0
+        if α == 0 || a == 0
             fz = $op(dual(a,b))
             p = β
         elseif α > 0
