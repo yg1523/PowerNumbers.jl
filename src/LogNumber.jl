@@ -1,7 +1,7 @@
 # represents s*log(ε) + c as ε -> 0
-struct LogNumber <: Number
-    s::ComplexF64
-    c::ComplexF64
+struct LogNumber{T} <: Number
+    s::T
+    c::T
 end
 
 
@@ -45,18 +45,9 @@ for Typ in (:Bool, :Number)
 end
 /(l::LogNumber, b::Number) = LogNumber(l.s/b, l.c/b)
 
-function exp(l::LogNumber)::ComplexF64
-    if real(l.s) > 0
-        0.0+0.0im
-    elseif real(l.s) < 0
-        Inf+Inf*im
-    elseif real(l.s) == 0 && imag(l.s) == 0
-        exp(l.c)
-    else
-        NaN + NaN*im
-    end
-end
+exp(l::LogNumber) = PowerNumber(exp(l.c), 0, l.s, l.s)
+expm1(l::LogNumber) = exp(l) - 1
 
-Complex{Float64}(a::LogNumber) = a(1)
+
 
 Base.show(io::IO, x::LogNumber) = print(io, "($(logpart(x)))log ε + $(realpart(x))")

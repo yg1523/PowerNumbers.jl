@@ -50,3 +50,38 @@ end
     @test sin(sqrt(ε))^2 === PowerNumber(1.0,1.0)	
     @test sin(sqrt(ε))^2.0 === PowerNumber(1.0,1.0)	
 end
+
+@testset "LogNumber" begin
+    ε = PowerNumber(1.0,1.0)
+    z = 1-ε
+    @test log1p(-z) isa LogNumber
+    @test exp(LogNumber(2,3)) == exp(3)*ε^2
+    HypergeometricFunctions.expm1(LogNumber(2,3))
+end
+
+@testset "Rational" begin
+    @test_broken PowerNumber(1.,0,0.,1.) + PowerNumber(-1.,0,2.,2.) == PowerNumber(1.,0.,0.,1)
+    @test_broken (1 + 1/ε + 1/ε^2) / (1 + 1/ε + 1/ε^2) == 1
+end
+
+
+@testset "HypergeometricFunctions" begin
+a,b,c = 1.154,1.2543,1.3543345
+ε = PowerNumber(1.0,1.0)
+z = 1-ε
+_₂F₁(a,b,c,z)
+
+a,b,c = 1.1,1.2,1.3
+@test_broken _₂F₁(a,b,c,z)
+log1p(-z)
+end
+z/(1-z) |> typeof
+
+0.19999999999999996, 0.10000000000000009, 1.3, 1.0 + (-1.0)ϵ^1.0 + o(ϵ^1.0)
+(HypergeometricFunctions._₂F₁general)(0.10000000000000009, 0.19999999999999996, 1.3, 1.0 + (-1.0)ϵ^1.0 + o(ϵ^1.0))
+(HypergeometricFunctions._₂F₁Inf)(0.10000000000000009, 1.1, 1.3, (-1.0)ϵ^-1.0 + (1.0)ϵ^0.0 + o(ϵ^0.0))
+(HypergeometricFunctions.AInf)(0.10000000000000009, 1.1, 1.3, (-1.0)ϵ^1.0 + (-1.0)ϵ^2.0 + o(ϵ^2.0), 1, 0.0)
+z = (-1.0)ϵ^1.0 + (-1.0)ϵ^2.0 + o(ϵ^2.0)
+z = PowerNumber(-1.,-1.,1.,2.)
+@enter (HypergeometricFunctions.BInf)(0.10000000000000009, 1.1, 1.3, z, 1, 0.0)
+@enter (HypergeometricFunctions.recInfβ₀)(0.10000000000000009, 1.1, 1.3, z, 1, 0.0)
