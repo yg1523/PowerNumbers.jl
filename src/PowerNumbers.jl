@@ -23,9 +23,9 @@ struct PowerNumber{T<:Number,V<:Number} <: Number
     if α > β 
         error("Must have α<=β") 
     elseif α == β 
-        new{T,V}(0,A+B,β,β)
+        new{T,V}(A+B,0,β,β)
     elseif A == 0
-        new{T,V}(0,B,β,β)
+        new{T,V}(B,0,β,β)
     else
         new{T,V}(A,B,α,β)
     end
@@ -33,7 +33,7 @@ end
 
 PowerNumber(a::T, b::T, c::V, d::V) where {T,V} = PowerNumber{T,V}(a,b,c,d)
 PowerNumber(a,b,c,d) = PowerNumber(promote(a,b)..., promote(c,d)...)
-PowerNumber(a,b) = PowerNumber(0,a,b,b)
+PowerNumber(a,b) = PowerNumber(a,0,b,b)
 
 const ϵ = PowerNumber(1,1)
 
@@ -147,6 +147,13 @@ for op in functionlist
 	end
 end
 
-Base.show(io::IO, x::PowerNumber) = print(io, "($(x.A))ϵ^$(x.α) + ($(x.B))ϵ^$(x.β)")
+function Base.show(io::IO, x::PowerNumber) 
+    if x.α == x.β
+        @assert iszero(x.B)
+        print(io, "($(x.A))ϵ^$(x.α)+ o(ϵ^$(x.α))")
+    else
+        print(io, "($(x.A))ϵ^$(x.α) + ($(x.B))ϵ^$(x.β) + o(ϵ^$(x.β))")
+    end
+end
 
 end # module

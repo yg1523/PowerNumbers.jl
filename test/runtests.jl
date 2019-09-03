@@ -1,6 +1,5 @@
-using PowerNumbers, Test#, SingularIntegralEquations.HypergeometricFunctions
+using PowerNumbers, Test, HypergeometricFunctions
 import PowerNumbers: PowerNumber, LogNumber, realpart, apart, bpart, alpha, beta
-#import SingularIntegralEquations.HypergeometricFunctions: speciallog
 
 @testset "RiemannDual -> PowerNumber" begin
     for h in (0.1,0.01), a in (2exp(0.1im),1.1)
@@ -47,7 +46,7 @@ end
 end
 
 @testset "sin" begin
-	ε = PowerNumber(1,1)
-	@test sin(sqrt(ε))^2 === PowerNumber(1.0,1.0)	
-	@test sin(sqrt(ε))^2.0 === PowerNumber(1.0,1.0)	
+    ε = PowerNumber(1,1)
+    @test sin(sqrt(ε))^2 === PowerNumber(1.0,1.0)	
+    @test sin(sqrt(ε))^2.0 === PowerNumber(1.0,1.0)	
 end
