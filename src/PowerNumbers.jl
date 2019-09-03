@@ -134,7 +134,7 @@ functionlist = (:abs2, :log10, :log2, :exp, :exp2, :expm1,
 for op in functionlist
     @eval function $op(z::PowerNumber)
         a,b,α,β = apart(z),bpart(z),alpha(z),beta(z)
-        if α == 0 || a == 0
+        if α == 0
             fz = $op(dual(a,b))
             p = β
         elseif α > 0
