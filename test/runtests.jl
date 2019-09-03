@@ -33,22 +33,6 @@ import PowerNumbers: PowerNumber, LogNumber, realpart, apart, bpart, alpha, beta
 
 end
 
-#=
-@testset "Multiplication" begin
-    list = [PowerNumber(0,1,0,0.5),PowerNumber(1,0,-0.5,0),PowerNumber(3,1,0,0.2),PowerNumber(3*im,1,0,0.2),PowerNumber(-3*im,1,0,0.2),PowerNumber(3*im,0,0,0.1),PowerNumber(-3*im,0,0,0.1),1/PowerNumber(3*im,1,0,0.2)]
-    for i in 1:length(list)
-        for j in i+1:length(list)
-            @test list[i]*list[j] == list[j]*list[i]
-            for k in j+1:length(list)
-                @test (list[i]*list[j])*list[k] ≈ list[i]*(list[j]*list[k])
-                @test list[i]*(list[j]+list[k]) ≈ (list[i]*list[j]) + (list[i]*list[k])
-                list[i]*(list[j]+list[k]) ≈ (list[i]*list[j]) + (list[i]*list[k]) ? print() : println(list[i],"\n",list[j],"\n",list[k],"\n")
-            end
-        end
-    end
-end
-=#
-
 @testset "PowerNumbers arithmetic" begin
     h = 0.000000001
     @test inv(PowerNumber(1.0,2.0,-1/2,0))(h) ≈ inv(h^(-1/2) + 2) rtol = 0.001

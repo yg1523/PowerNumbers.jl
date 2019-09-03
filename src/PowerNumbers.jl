@@ -10,7 +10,7 @@ import Base: exp, atanh, log1p, abs, log, inv, real, imag, conj, sqrt,
                 tanh, sech, csch, coth, asinh, acosh, asech, acsch, acoth, deg2rad, rad2deg 
 import DualNumbers: Dual, realpart, epsilon, dual
 
-export PowerNumber, LogNumber
+export PowerNumber, LogNumber, ϵ
 
 include("LogNumber.jl")
 
@@ -35,6 +35,8 @@ PowerNumber(a::T, b::T, c::V, d::V) where {T,V} = PowerNumber{T,V}(a,b,c,d)
 PowerNumber(a,b,c,d) = PowerNumber(promote(a,b)..., promote(c,d)...)
 PowerNumber(a,b) = PowerNumber(0,a,b,b)
 
+const ϵ = PowerNumber(1,1)
+
 apart(z::PowerNumber) = z.A
 bpart(z::PowerNumber) = z.B
 alpha(z::PowerNumber) = z.α
@@ -58,16 +60,13 @@ function +(x::PowerNumber, y::PowerNumber)
     if length(list) == 1
         return PowerNumber(sum(coef),list[1]) 
     end
-    for i in 2:length(list)-1
+    for i in 2:length(list)
         tot1 = sum(coef .* (exps .≈ list[i-1]))
         tot2 = sum(coef .* (exps .≈ list[i]))
-        if tot2 != 0 
+        if tot2 != 0 || i == length(list)
             return PowerNumber(tot1,tot2,list[i-1],list[i])
         end
     end
-    tot1 = sum(coef .* (exps .≈ list[end-1]))
-    tot2 = sum(coef .* (exps .≈ list[end]))
-    return PowerNumber(tot1,tot2,list[end-1],list[end])
 end
 
 +(x::PowerNumber, y::Number) = x + PowerNumber(0,y,0,0)
@@ -148,14 +147,6 @@ for op in functionlist
 	end
 end
 
-#=
-#speciallog(x::PowerNumber{<:Complex}) = alpha(x) == 1.0 ? (s = sqrt(x); 3(atanh(s)-realpart(s))/realpart(s)^3) : error("Only implemented for alpha = 1")
-
-# function SingularIntegralEquations.HypergeometricFunctions.speciallog(x::PowerNumber)
-#     s = sqrt(x)
-#     return 3(atanh(s)-realpart(s))/realpart(s)^3
-# end
-=#
-Base.show(io::IO, x::PowerNumber) = print(io, "($(x.A))ε^$(x.α) + ($(x.B))ε^$(x.β)")
+Base.show(io::IO, x::PowerNumber) = print(io, "($(x.A))ϵ^$(x.α) + ($(x.B))ϵ^$(x.β)")
 
 end # module
