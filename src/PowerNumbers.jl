@@ -52,7 +52,7 @@ alpha(z::PowerNumber) = z.α
 beta(z::PowerNumber) = z.β
 
 PowerNumber(x::Dual) = PowerNumber(realpart(x), epsilon(x), 0, 1)
-Dual(x::PowerNumber) = alpha(x) == 0 && beta(x) == 1 ? Dual(apart(x), bpart(x)) : throw("α, β must equal 0, 1 to convert to dual.")
+Dual(x::PowerNumber) = (alpha(x) == 0 && beta(x) == 1) ? (return Dual(apart(x), bpart(x))) : (throw("α, β must equal 0, 1 to convert to dual."))
 dual(x::PowerNumber) = Dual(x)
 
 zero(x::PowerNumber) = PowerNumber(zero(x.A), zero(x.B), x.α, x.β)
@@ -65,22 +65,25 @@ end
 function +(x::PowerNumber, y::PowerNumber)
     a,b,α,β = apart(x),bpart(x),alpha(x),beta(x)
     c,d,γ,δ = apart(y),bpart(y),alpha(y),beta(y)
-    exps = [α,β,γ,δ]
-    coef = [a,b,c,d]
-    list = sort(unique(exps))
-    if length(list) == 1
-        return PowerNumber(sum(coef),list[1]) 
+    if δ ≈ β && d != 0
+        return +(PowerNumber(a,b+d,α,β), PowerNumber(c,0,γ,δ))
+    elseif δ < β #we assume β < δ
+        return +(y, x)
+    elseif γ > β || c == 0
+        return x
+    elseif γ ≈ β
+        return PowerNumber(a,b+c,α,β)
+    elseif γ < β && γ > α
+        return PowerNumber(a,c,α,γ)
+    elseif γ ≈ α
+        return PowerNumber(a+c,b,α,β)
+    else 
+        return PowerNumber(c,a,γ,α)
     end
-    for i in 2:length(list)
-        tot1 = sum(coef .* (exps .≈ list[i-1]))
-        tot2 = sum(coef .* (exps .≈ list[i]))
-        if tot2 != 0 || i == length(list)
-            return PowerNumber(tot1,tot2,list[i-1],list[i])
-        end
-    end
+
 end
 
-+(x::PowerNumber, y::Number) = x + PowerNumber(0,y,0,0)
++(x::PowerNumber, y::Number) = x + PowerNumber(y,0,0,Inf)
 +(y::Number, x::PowerNumber) = +(x::PowerNumber, y::Number)
 
 function *(x::PowerNumber, y::PowerNumber)
@@ -99,7 +102,7 @@ end
 
 function inv(x::PowerNumber)
     a,b,α,β = apart(x),bpart(x),alpha(x),beta(x)
-    a != 0 ? PowerNumber(1/a,-b*a^(-2),-α,β-2*α) : PowerNumber(1/b,-β)
+    α != β ? (return PowerNumber(1/a,-b*a^(-2),-α,β-2*α)) : (return PowerNumber(1/a,-β))
 end
 
 /(z::PowerNumber, x::PowerNumber) = z*inv(x)
@@ -109,8 +112,7 @@ end
 ^(z::PowerNumber, p::Integer) = invoke(^, Tuple{Number,Integer}, z, p)
 function ^(z::PowerNumber, p::Number)
     a,b,α,β = apart(z),bpart(z),alpha(z),beta(z)
-    a == 0 ? PowerNumber(b^p,β*p) :
-    PowerNumber(a^p,(a^(p-1))*b*p,p*α,β+(p-1)*α)
+    α == β ? (return PowerNumber(a^p,α*p)) : (return PowerNumber(a^p,(a^(p-1))*b*p,p*α,β+(p-1)*α))
 end
 
 sqrt(z::PowerNumber) = z^0.5
@@ -125,9 +127,9 @@ cbrt(z::PowerNumber) = z^(1/3)
 isapprox(a::PowerNumber, b::PowerNumber; opts...) = ≈(apart(a), apart(b); opts...) && ≈(bpart(a), bpart(b); opts...) && 
                                                 ≈(alpha(a), alpha(b); opts...) && ≈(beta(a), beta(b); opts...)
 
-function log(z::PowerNumber)
+function log(z::PowerNumber{T,V}) where {T,V}
     a,b,α,β = apart(z),bpart(z),alpha(z),beta(z)
-    a ≈ 0 ? (b ≈ 0 ? error("Cannot evaluate log at 0") : return LogNumber(β, log(b))) : return LogNumber(α, log(a))
+    a != 0 ? (return LogNumber(promote(α, log(a))...)) : error("Cannot evaluate log at 0")
 end
 
 log1p(z::PowerNumber) = log(z+1)
@@ -177,8 +179,6 @@ function isless(w::Real, z::PowerNumber{T}) where T
     α < 0 && return !signbit(a) # TODO: What if w == -Inf
     isless(w,a)
 end
-
-
 
 function Base.show(io::IO, x::PowerNumber) 
     if x.α == x.β || iszero(x.B)

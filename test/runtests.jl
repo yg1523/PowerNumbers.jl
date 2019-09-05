@@ -11,7 +11,7 @@ import PowerNumbers: PowerNumber, LogNumber, realpart, apart, bpart, alpha, beta
         @test log1p(PowerNumber(-1,a,0,1))(h) ≈ log(h*a)
         @test log1p(PowerNumber(a,Inf,-1,0))(h) ≈ log(a/h)
     end
-
+ 
     h=0.0001
     for z in (PowerNumber(1,3exp(0.2im),0,1), PowerNumber(1,0.5exp(-1.3im),0,1),
               PowerNumber(-1,3exp(0.2im),0,1), PowerNumber(-1,0.5exp(-1.3im),0,1),
@@ -60,28 +60,29 @@ end
 end
 
 @testset "Rational" begin
-    @test_broken PowerNumber(1.,0,0.,1.) + PowerNumber(-1.,0,2.,2.) == PowerNumber(1.,0.,0.,1)
+    ε = PowerNumber(1.0,1.0)
+    @test PowerNumber(1.,0,0.,1.) + PowerNumber(-1.,0,2.,2.) == PowerNumber(1.,0.,0.,1)
     @test_broken (1 + 1/ε + 1/ε^2) / (1 + 1/ε + 1/ε^2) == 1
 end
 
-
 @testset "HypergeometricFunctions" begin
-a,b,c = 1.154,1.2543,1.3543345
-ε = PowerNumber(1.0,1.0)
-z = 1-ε
-_₂F₁(a,b,c,z)
+    a,b,c = 1.154,1.2543,1.3543345
+    ε = PowerNumber(1.0,1.0)
+    z = 1-ε
+    _₂F₁(a,b,c,z)
 
-a,b,c = 1.1,1.2,1.3
-@test_broken _₂F₁(a,b,c,z)
-log1p(-z)
+    a,b,c = 1.1,1.2,1.3
+    @test_broken _₂F₁(a,b,c,z)
+    log1p(-z)
 end
+
 z/(1-z) |> typeof
 
-0.19999999999999996, 0.10000000000000009, 1.3, 1.0 + (-1.0)ϵ^1.0 + o(ϵ^1.0)
-(HypergeometricFunctions._₂F₁general)(0.10000000000000009, 0.19999999999999996, 1.3, 1.0 + (-1.0)ϵ^1.0 + o(ϵ^1.0))
-(HypergeometricFunctions._₂F₁Inf)(0.10000000000000009, 1.1, 1.3, (-1.0)ϵ^-1.0 + (1.0)ϵ^0.0 + o(ϵ^0.0))
-(HypergeometricFunctions.AInf)(0.10000000000000009, 1.1, 1.3, (-1.0)ϵ^1.0 + (-1.0)ϵ^2.0 + o(ϵ^2.0), 1, 0.0)
-z = (-1.0)ϵ^1.0 + (-1.0)ϵ^2.0 + o(ϵ^2.0)
+#0.19999999999999996, 0.10000000000000009, 1.3, 1.0 + (-1.0)ϵ^1.0 + o(ϵ^1.0)
+#(HypergeometricFunctions._₂F₁general)(0.10000000000000009, 0.19999999999999996, 1.3, 1.0 + (-1.0)ϵ^1.0 + o(ϵ^1.0))
+#(HypergeometricFunctions._₂F₁Inf)(0.10000000000000009, 1.1, 1.3, (-1.0)ϵ^-1.0 + (1.0)ϵ^0.0 + o(ϵ^0.0))
+#(HypergeometricFunctions.AInf)(0.10000000000000009, 1.1, 1.3, (-1.0)ϵ^1.0 + (-1.0)ϵ^2.0 + o(ϵ^2.0), 1, 0.0)
+#z = (-1.0)ϵ^1.0 + (-1.0)ϵ^2.0 + o(ϵ^2.0)
 z = PowerNumber(-1.,-1.,1.,2.)
 @enter (HypergeometricFunctions.BInf)(0.10000000000000009, 1.1, 1.3, z, 1, 0.0)
 @enter (HypergeometricFunctions.recInfβ₀)(0.10000000000000009, 1.1, 1.3, z, 1, 0.0)
