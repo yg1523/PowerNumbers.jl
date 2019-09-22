@@ -1,0 +1,148 @@
+\documentclass[acmsmall]{acmart}
+
+\usepackage{algorithm2e}
+
+\AtBeginDocument{%
+	\providecommand\BibTeX{{%
+			\normalfont B\kern-0.5em{\scshape i\kern-0.25em b}\kern-0.8em\TeX}}}
+
+\begin{document}
+	
+\title{PowerNumbers.jl: a fast approach to automatic asymptotics}
+
+\author{Sheehan Olver}
+\email{s.olver@imperial.ac.uk}
+\affiliation{%
+	\institution{Imperial College}
+	\city{London}
+	\state{England}
+	\postcode{SW7 2AZ}
+}
+
+\author{Matthew Rees}
+\email{matthew.rees.16@ucl.ac.uk}
+\affiliation{%
+	\institution{University College London}
+	\city{London}
+	\state{England}
+	\postcode{WC1E 6BT}
+}
+
+\begin{abstract}
+	We develop a scheme for quick arithmetic on asymptotic series, evaluated to just one or two terms. We give a full description of the algebraic rules for these "Power Numbers", with justification of sufficient equivalence to asymptotic algebra. Some example applications follow, including evaluation of rational functions at infinity.
+\end{abstract}
+
+\begin{CCSXML}
+	<ccs2012>
+	<concept>
+	<concept_id>10002950.10003705.10003707</concept_id>
+	<concept_desc>Mathematics of computing~Solvers</concept_desc>
+	<concept_significance>500</concept_significance>
+	</concept>
+	</ccs2012>
+\end{CCSXML}
+
+\ccsdesc[500]{Mathematics of computing~Solvers}
+
+\keywords{none}
+
+\maketitle
+
+\section{Introduction}
+
+\section{Description}
+
+Let $K$ be a field. The set of functions of $\epsilon \in [0,\infty)$,
+$$\mathbf{PN}^K_\epsilon = \{a\epsilon^\alpha + b\epsilon^\beta : a,b \in K;\alpha,\beta\in\mathbb{R}\cup\{\infty\}; \alpha\leq\beta\}$$ 
+is called the set of Power Numbers. In the case $\alpha=\beta$, we write only one term $(a+b)\epsilon^\beta$. Notationally, $\epsilon^0$ is omitted.
+We enforce the equality $0\epsilon^\alpha + b\epsilon^\beta = b\epsilon^\beta$. However, in general, $a\epsilon^\alpha + 0\epsilon^\beta \neq a\epsilon^\alpha$.
+By defining $(+,*)$ below, we acquire the double monoid $$\mathbb{PN}^K_\epsilon = (\mathbf{PN}^K_\epsilon,+,*)$$
+
+\subsection{Addition}
+$+:\mathbf{PN}^K_\epsilon \times \mathbf{PN}^K_\epsilon \rightarrow \mathbf{PN}^K_\epsilon$ is described by an algorithm.
+
+\begin{algorithm}[H]
+	\SetAlgoLined
+	\KwData{$a\epsilon^\alpha + b\epsilon^\beta, c\epsilon^\gamma + d\epsilon^\delta \in \mathbf{PN}^K_\epsilon$; assume WLOG that $\beta \leq \delta$}
+	\KwResult{$(a\epsilon^\alpha + b\epsilon^\beta) + (c\epsilon^\gamma + d\epsilon^\delta) = p\epsilon^\zeta + q\epsilon^\eta \in \mathbf{PN}^K_\epsilon$}
+	\uIf{$\beta=\delta$}{
+		\uIf{$\gamma=\beta$}{
+			$p = a$, $q = b + c + d$, $\zeta = \alpha$, $\eta = \beta$
+		}
+		\uElseIf{$\alpha<\gamma<\beta$}{
+			$p = a$, $q = c$, $\zeta = \alpha$, $\eta = \gamma$
+		}
+		\uElseIf{$\gamma=\alpha$}{
+			$p = a + c$, $q = b + d$, $\zeta = \alpha$, $\eta = \beta$
+		}
+		\Else{
+			$p = c$, $q = a$, $\zeta = \gamma$, $\eta = \alpha$
+		}
+	}
+	\Else{
+		\uIf{$\beta<\gamma$}{
+			$p = a$, $q = b$, $\zeta = \alpha$, $\eta = \beta$
+		}
+		\uElseIf{$\gamma=\beta$}{
+			$p = a$, $q = b + c$, $\zeta = \alpha$, $\eta = \beta$
+		}
+		\uElseIf{$\alpha<\gamma<\beta$}{
+			$p = a$, $q = c$, $\zeta = \alpha$, $\eta = \gamma$
+		}
+		\uElseIf{$\gamma=\alpha$}{
+			$p = a + c$, $q = b$, $\zeta = \alpha$, $\eta = \beta$
+		}
+		\Else{
+			$p = c$, $q = a$, $\zeta = \gamma$, $\eta = \alpha$
+		}
+	}
+	
+	\caption{Summing Power Numbers}	
+\end{algorithm}
+
+The additive identity for Power Numbers is $0\epsilon^\infty$.
+
+\subsection{Multiplication}
+$*:\mathbf{PN}^K_\epsilon \times \mathbf{PN}^K_\epsilon \rightarrow \mathbf{PN}^K_\epsilon$ can be most simply expressed as addition of Power Numbers:
+\begin{displaymath}
+(a\epsilon^\alpha + b\epsilon^\beta) * (c\epsilon^\gamma + d\epsilon^\delta)
+= (ac\epsilon^{\alpha+\gamma} + ad\epsilon^{\alpha+\delta}) + (bc\epsilon^{\beta+\gamma}+ bd\epsilon^{\beta+\delta})
+= p\epsilon^\zeta + q\epsilon^\eta \in \mathbf{PN}^K_\epsilon
+\end{displaymath}
+
+The multiplicative identity for Power Numbers is $1 + 0\epsilon^\infty$.
+
+\subsection{Pseudo-Negation}
+While $\mathbb{PN}^K_\epsilon$ is a monoid under both addition and multiplication, we can define two operations that have some of the properties we expect for subtraction and division. \\
+$-:\mathbf{PN}^K_\epsilon \rightarrow \mathbf{PN}^K_\epsilon$ is defined as:
+$$-(a\epsilon^\alpha + b\epsilon^\beta) = (-a)\epsilon^\alpha + (-b)\epsilon^\beta$$
+Naturally, $-:\mathbf{PN}^K_\epsilon \times \mathbf{PN}^K_\epsilon \rightarrow \mathbf{PN}^K_\epsilon$ is defined as $A + (-(B))$, where $A, B \in \mathbf{PN}^K_\epsilon$.
+Note that for $\beta \neq \infty$, we have $(a\epsilon^\alpha + b\epsilon^\beta) - (a\epsilon^\alpha + b\epsilon^\beta) = 0\epsilon^\beta \neq 0\epsilon^\infty$.
+
+\subsection{Pseudo-Inverse}
+The multiplicative pseudo-inverse is slightly more complicated.
+
+\begin{algorithm}[H]
+	\SetAlgoLined
+	\KwData{$a\epsilon^\alpha + b\epsilon^\beta \in \mathbf{PN}^K_\epsilon$}
+	\KwResult{$$\frac{1}{a\epsilon^\alpha + b\epsilon^\beta} = p\epsilon^\zeta + q\epsilon^\eta \in \mathbf{PN}^K_\epsilon$$}
+	\uIf{$\alpha=\beta$}{
+		$p = 0$, $q = \frac{1}{a+b}$, $\zeta = -\alpha$, $\eta = -\alpha$
+	}
+	\Else{
+		$p = \frac{1}{a+b}$, $q = -\frac{b}{a^2}$, $\zeta = -\alpha$, $\eta = \beta-2\alpha$
+	}
+	
+	\caption{Multiplicative Inversion}	
+\end{algorithm}
+
+This matches the Dual Numbers case, where $\alpha = 0$, $\beta = 1$.
+Similarly to subtraction, 
+$$\frac{a\epsilon^\alpha + b\epsilon^\beta}{a\epsilon^\alpha + b\epsilon^\beta} \neq 1 + 0\epsilon^\infty$$
+
+\section{Examples}
+
+\section{Conclusion}
+
+
+\end{document}
