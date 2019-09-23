@@ -1,6 +1,7 @@
 \documentclass[acmsmall]{acmart}
 
 \usepackage{algorithm2e}
+\usepackage{amsthm}
 
 \AtBeginDocument{%
 	\providecommand\BibTeX{{%
@@ -51,10 +52,12 @@
 \section{Introduction}
 
 \section{Description}
-
+\begin{definition}
 Let $K$ be a field. The set of functions of $\epsilon \in [0,\infty)$,
 $$\mathbf{PN}^K_\epsilon = \{a\epsilon^\alpha + b\epsilon^\beta : a,b \in K;\alpha,\beta\in\mathbb{R}\cup\{\infty\}; \alpha\leq\beta\}$$ 
-is called the set of Power Numbers. In the case $\alpha=\beta$, we write only one term $(a+b)\epsilon^\beta$. Notationally, $\epsilon^0$ is omitted.
+is called the set of \textbf{Power Numbers}. 
+\end{definition}
+In the case $\alpha=\beta$, we write only one term $(a+b)\epsilon^\beta$. Notationally, $\epsilon^0$ is omitted.
 We enforce the equality $0\epsilon^\alpha + b\epsilon^\beta = b\epsilon^\beta$. However, in general, $a\epsilon^\alpha + 0\epsilon^\beta \neq a\epsilon^\alpha$.
 By defining $(+,*)$ below, we acquire the double monoid $$\mathbb{PN}^K_\epsilon = (\mathbf{PN}^K_\epsilon,+,*)$$
 
@@ -140,7 +143,40 @@ This matches the Dual Numbers case, where $\alpha = 0$, $\beta = 1$.
 Similarly to subtraction, 
 $$\frac{a\epsilon^\alpha + b\epsilon^\beta}{a\epsilon^\alpha + b\epsilon^\beta} \neq 1 + 0\epsilon^\infty$$
 
+\subsection{Exponentiation \& Analytic Functions}
+
+The definition of $A^m$ for $A \in \mathbf{PN}^K_\epsilon$, $m \in \mathbb{Z}$ follows naturally from the above definitions of multiplication and division. \\
+Since we will generally consider $\epsilon$ to be small, we can extend any analytic function $h:K \rightarrow K$ to $h:\mathbf{PN}^K_{\epsilon} \rightarrow \mathbf{PN}^K_{\epsilon}$ for $\alpha \geq 0$. This is via Taylor series:
+
+$$h(a\epsilon^0+b\epsilon^\beta) = h(a+b\epsilon^\beta) = h(a) + b\epsilon^\beta h'(a) \quad$$
+$$h(a\epsilon^\alpha+b\epsilon^\beta) = h(0) + a\epsilon^\alpha h'(0) \quad where \quad \alpha \neq 0$$
+
+\subsection{Asymptotic Series}
+
+Consider an asymptotic series that is also a Hahn series; that is,
+\begin{equation}
+S(z) = \sum_{n=1}^{\infty}a_nz^{\alpha_n} \quad as \quad z \rightarrow 0
+\end{equation}
+where the $\alpha_n \in \mathbb{R}$ are strictly increasing.
+The primary significance of Power Numbers comes from the following 
+\begin{proposition}
+	Let $f(z) = az^\alpha + bz^\beta + o(z^\beta)$,	$g(z) = cz^\gamma + dz^\delta + o(z^\delta)$ be series of the form in $(1)$.
+	Define the associated Power Numbers, $F = a\epsilon^\alpha + b\epsilon^\beta$, $G = c\epsilon^\gamma + d\epsilon^\delta$.
+	Then, where $\cdot$ is one of $(+$, $-$, $*$, $/)$ we have that 
+	$$f(z) \cdot g(z) = pz^\zeta + qz^\eta + o(z^\eta)$$
+	$$\Leftrightarrow$$
+	$$F \cdot G = p\epsilon^\zeta + q\epsilon^\eta$$
+	Furthermore, for any analytic function $h:K \rightarrow K$ we have
+	$$h(f(z)) = pz^\zeta + qz^\eta + o(z^\eta)$$ 
+	$$\Leftrightarrow$$
+	$$h(F) = p\epsilon^\zeta + q\epsilon^\eta$$
+\end{proposition}
+
+The proof is trivial.
+
 \section{Examples}
+
+\subsection{Rational Functions At Infinity}
 
 \section{Conclusion}
 
