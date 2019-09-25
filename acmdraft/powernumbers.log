@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (MiKTeX 2.9.6630 64-bit) (preloaded format=pdflatex 2018.6.4)  23 SEP 2019 19:34
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (MiKTeX 2.9.6630 64-bit) (preloaded format=pdflatex 2018.6.4)  25 SEP 2019 19:46
 entering extended mode
 **./powernumbers.tex
 (powernumbers.tex
@@ -1129,26 +1129,19 @@ LaTeX Font Info:    Font shape `T1/LinuxLibertineT-TLF/m/sc' will be
 (Font)              scaled to size 10.0pt on input line 163.
 
 [3.3] [4.4]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 184.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 184.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 188.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 188.
  (powernumbers.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 184.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 184.
-
-
-Package rerunfilecheck Warning: File `powernumbers.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `powernumbers.out':
-(rerunfilecheck)             Before: FAFD468CE86BA68BA712946E28BDA56F;1536
-(rerunfilecheck)             After:  71736A1F1600ACA22C6359DEF4898D87;1777.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 188.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 188.
+Package rerunfilecheck Info: File `powernumbers.out' has not changed.
+(rerunfilecheck)             Checksum: A493FE755B0EB399B193F58BABC2E15D;1787.
  ) 
 Here is how much of TeX's memory you used:
- 18914 strings out of 493305
- 285111 string characters out of 3138878
- 408938 words of memory out of 3000000
- 21744 multiletter control sequences out of 15000+200000
+ 18915 strings out of 493305
+ 285127 string characters out of 3138878
+ 408941 words of memory out of 3000000
+ 21745 multiletter control sequences out of 15000+200000
  154342 words of font info for 245 fonts, out of 3000000 for 9000
  1302 hyphenation exceptions out of 8191
  60i,13n,94p,805b,466s stack positions out of 5000i,500n,10000p,200000b,50000s
@@ -1175,9 +1168,9 @@ gram Files/MiKTeX 2.9/fonts/type1/public/txfonts/txsyb.pfb><C:/Program Files/Mi
 KTeX 2.9/fonts/type1/public/txfonts/txsyc.pfb><C:/Program Files/MiKTeX 2.9/font
 s/type1/public/newtx/txsys.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/
 newtx/zxlri.pfb>
-Output written on powernumbers.pdf (4 pages, 647209 bytes).
+Output written on powernumbers.pdf (4 pages, 648911 bytes).
 PDF statistics:
- 186 PDF objects out of 1000 (max. 8388607)
+ 189 PDF objects out of 1000 (max. 8388607)
  24 named destinations out of 1000 (max. 500000)
- 49765 words of extra memory for PDF output out of 51595 (max. 10000000)
+ 49773 words of extra memory for PDF output out of 51595 (max. 10000000)
 
