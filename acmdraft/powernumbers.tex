@@ -134,7 +134,10 @@ The \textbf{multiplicative pseudo-inverse} $inv:\mathbf{PN}^K_\epsilon \rightarr
 	\SetAlgoLined
 	\KwData{$a\epsilon^\alpha + b\epsilon^\beta \in \mathbf{PN}^K_\epsilon$}
 	\KwResult{$$\frac{1}{a\epsilon^\alpha + b\epsilon^\beta} = p\epsilon^\zeta + q\epsilon^\eta \in \mathbf{PN}^K_\epsilon$$}
-	\uIf{$\alpha=\beta$}{
+	\uIf{$\alpha=\infty$}{
+		Not defined.
+	}
+	\uElseIf{$\alpha=\beta$}{
 		$p = 0$, $q = \frac{1}{a+b}$, $\zeta = -\alpha$, $\eta = -\alpha$
 	}
 	\Else{
