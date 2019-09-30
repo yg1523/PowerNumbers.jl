@@ -3,6 +3,12 @@
 \usepackage{algorithm2e}
 \usepackage{amsthm}
 
+\usepackage{todonotes}
+\newcommand{\sotodo}{\todo[color=green]}
+\newcommand{\sotodoinline}{\todo[color=green,inline=true]}
+
+
+
 \AtBeginDocument{%
 	\providecommand\BibTeX{{%
 			\normalfont B\kern-0.5em{\scshape i\kern-0.25em b}\kern-0.8em\TeX}}}
@@ -80,6 +86,7 @@ Thus any
 %
 
 \section{Description}
+\sotodoinline{$\mathbf{PN}^K$ shouldn't depend on $\epsilon$ as a paramter}
 \begin{definition}
 Let $K$ be a field. The set of functions of $\epsilon \in [0,\infty)$,
 $$\mathbf{PN}^K_\epsilon = \{a\epsilon^\alpha + b\epsilon^\beta : a,b \in K;\alpha,\beta\in\mathbb{R}\cup\{\infty\}; \alpha\leq\beta\}$$ 
