@@ -30,7 +30,7 @@
 }
 
 \begin{abstract}
-	We develop a scheme for quick arithmetic on asymptotic series, evaluated to just one or two terms. We give a full description of the algebraic rules for these "Power Numbers", with justification of sufficient equivalence to asymptotic algebra. Some example applications follow, including evaluation of rational functions at infinity.
+	We develop a scheme for quick arithmetic on asymptotic series, evaluated to just one or two terms. This generalizes the concept of dual numbers in automatic differentiation to support general algebraic powers, including negative powers to capture behaviour at infinity.  We give a full description of the algebraic rules for these newly defined {\it power numbers}, with justification of guaranteed equivalence to asymptotic algebra. Some example applications follow, including evaluation of complicated rational functions at infinity defined in terms of linear algebra, hypergeometric functions, and Stieltjes transforms over intervals for functions with power-like singularities and the endpoints.
 \end{abstract}
 
 \begin{CCSXML}
@@ -51,11 +51,39 @@
 
 \section{Introduction}
 
+Asymptotic expansions are important computational tools in applied mathematics, that can reduce complicated functions to simple forms with specified accuracy. 
+
+
+{\it Dual numbers} are a simple algebraic structure that underlies forward mode automatic-differentiation, with a convenient representation in terms of $2 \times 2$ matrices:
+
+\begin{definition}
+Let $K$ be a field. The set of matrices
+$$\mathbf{D}^K = \left\{\begin{pmatrix}a & b \\ 0 & a \end{pmatrix} : a,b \in K\right\}$$ 
+are called the set of \textbf{dual numbers}. The elements are typically denoted by
+$$
+a + b \epsilon \qquad \hbox{where} \qquad \epsilon = \begin{pmatrix} 0 & 1 \\ & 0 \end{pmatrix}.
+$$
+\end{definition}
+
+The property that $\epsilon^2 = 0 $ suffices to guarante that general analytic matrix functions applied to dual numbers encode the derivative at the point $a$, namely:
+$$
+f(a + b \epsilon) = f(a) + b f'(b) \epsilon
+$$
+Thus any 
+
+%are an algebraic structure whose elements take the form of
+%$$
+%a + b \epsilon
+%$$
+%where $a,b$ are elements of a field and $\epsilon$ follows the rule $\epsilon^2 = 0$.  
+%
+%
+
 \section{Description}
 \begin{definition}
 Let $K$ be a field. The set of functions of $\epsilon \in [0,\infty)$,
 $$\mathbf{PN}^K_\epsilon = \{a\epsilon^\alpha + b\epsilon^\beta : a,b \in K;\alpha,\beta\in\mathbb{R}\cup\{\infty\}; \alpha\leq\beta\}$$ 
-is called the set of \textbf{Power Numbers}. 
+is called the set of \textbf{power numbers}. 
 \end{definition}
 In the case $\alpha=\beta$, we write only one term $(a+b)\epsilon^\beta$. Notationally, $\epsilon^0$ is omitted.
 We enforce the equality $0\epsilon^\alpha + b\epsilon^\beta = b\epsilon^\beta$. However, in general, $a\epsilon^\alpha + 0\epsilon^\beta \neq a\epsilon^\alpha$.
