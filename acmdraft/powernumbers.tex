@@ -61,8 +61,9 @@ In the case $\alpha=\beta$, we write only one term $(a+b)\epsilon^\beta$. Notati
 We enforce the equality $0\epsilon^\alpha + b\epsilon^\beta = b\epsilon^\beta$. However, in general, $a\epsilon^\alpha + 0\epsilon^\beta \neq a\epsilon^\alpha$.
 By defining $(+,*)$ below, we acquire the double monoid $$\mathbb{PN}^K_\epsilon = (\mathbf{PN}^K_\epsilon,+,*)$$
 
-\subsection{Addition}
-$+:\mathbf{PN}^K_\epsilon \times \mathbf{PN}^K_\epsilon \rightarrow \mathbf{PN}^K_\epsilon$ is described by an algorithm.
+\subsection{Basic Operations}
+\begin{definition}
+\textbf{Addition} $+:\mathbf{PN}^K_\epsilon \times \mathbf{PN}^K_\epsilon \rightarrow \mathbf{PN}^K_\epsilon$ is described by an algorithm.
 
 \begin{algorithm}[H]
 	\SetAlgoLined
@@ -104,9 +105,10 @@ $+:\mathbf{PN}^K_\epsilon \times \mathbf{PN}^K_\epsilon \rightarrow \mathbf{PN}^
 \end{algorithm}
 
 The additive identity for Power Numbers is $0\epsilon^\infty$.
+\end{definition}
 
-\subsection{Multiplication}
-$*:\mathbf{PN}^K_\epsilon \times \mathbf{PN}^K_\epsilon \rightarrow \mathbf{PN}^K_\epsilon$ can be most simply expressed as addition of Power Numbers:
+\begin{definition}
+\textbf{Multiplication} $*:\mathbf{PN}^K_\epsilon \times \mathbf{PN}^K_\epsilon \rightarrow \mathbf{PN}^K_\epsilon$ can be most simply expressed as addition of Power Numbers:
 \begin{displaymath}
 (a\epsilon^\alpha + b\epsilon^\beta) * (c\epsilon^\gamma + d\epsilon^\delta)
 = (ac\epsilon^{\alpha+\gamma} + ad\epsilon^{\alpha+\delta}) + (bc\epsilon^{\beta+\gamma}+ bd\epsilon^{\beta+\delta})
@@ -114,22 +116,28 @@ $*:\mathbf{PN}^K_\epsilon \times \mathbf{PN}^K_\epsilon \rightarrow \mathbf{PN}^
 \end{displaymath}
 
 The multiplicative identity for Power Numbers is $1 + 0\epsilon^\infty$.
+\end{definition}
+	
 
-\subsection{Pseudo-Negation}
 While $\mathbb{PN}^K_\epsilon$ is a monoid under both addition and multiplication, we can define two operations that have some of the properties we expect for subtraction and division. \\
-$-:\mathbf{PN}^K_\epsilon \rightarrow \mathbf{PN}^K_\epsilon$ is defined as:
+
+\begin{definition} 
+\textbf{Subtraction} $-:\mathbf{PN}^K_\epsilon \rightarrow \mathbf{PN}^K_\epsilon$ is defined as:
 $$-(a\epsilon^\alpha + b\epsilon^\beta) = (-a)\epsilon^\alpha + (-b)\epsilon^\beta$$
 Naturally, $-:\mathbf{PN}^K_\epsilon \times \mathbf{PN}^K_\epsilon \rightarrow \mathbf{PN}^K_\epsilon$ is defined as $A + (-(B))$, where $A, B \in \mathbf{PN}^K_\epsilon$.
-Note that for $\beta \neq \infty$, we have $(a\epsilon^\alpha + b\epsilon^\beta) - (a\epsilon^\alpha + b\epsilon^\beta) = 0\epsilon^\beta \neq 0\epsilon^\infty$.
+\end{definition}
 
-\subsection{Pseudo-Inverse}
-The multiplicative pseudo-inverse is slightly more complicated.
+\begin{definition}
+The \textbf{multiplicative pseudo-inverse} $inv:\mathbf{PN}^K_\epsilon \rightarrow \mathbf{PN}^K_\epsilon$ is slightly more complicated.
 
 \begin{algorithm}[H]
 	\SetAlgoLined
 	\KwData{$a\epsilon^\alpha + b\epsilon^\beta \in \mathbf{PN}^K_\epsilon$}
 	\KwResult{$$\frac{1}{a\epsilon^\alpha + b\epsilon^\beta} = p\epsilon^\zeta + q\epsilon^\eta \in \mathbf{PN}^K_\epsilon$$}
-	\uIf{$\alpha=\beta$}{
+	\uIf{$\alpha=\infty$}{
+		Not defined.
+	}
+	\uElseIf{$\alpha=\beta$}{
 		$p = 0$, $q = \frac{1}{a+b}$, $\zeta = -\alpha$, $\eta = -\alpha$
 	}
 	\Else{
@@ -139,11 +147,17 @@ The multiplicative pseudo-inverse is slightly more complicated.
 	\caption{Multiplicative Inversion}	
 \end{algorithm}
 
-This matches the Dual Numbers case, where $\alpha = 0$, $\beta = 1$.
-Similarly to subtraction, 
-$$\frac{a\epsilon^\alpha + b\epsilon^\beta}{a\epsilon^\alpha + b\epsilon^\beta} \neq 1 + 0\epsilon^\infty$$
+\textbf{Division} $\div:\mathbf{PN}^K_\epsilon \times \mathbf{PN}^K_\epsilon \rightarrow \mathbf{PN}^K_\epsilon$ is defined as $A \div B = A * (inv(B))$, where $A, B \in \mathbf{PN}^K_\epsilon$.
+\end{definition}
 
-\subsection{Exponentiation \& Analytic Functions}
+This matches the Dual Numbers case, where $\alpha = 0$, $\beta = 1$.
+
+There is a special case wherein the pseudo-negative and -inverse are the true negative and inverse, which motivates the following
+\begin{proposition}
+For $A = a\epsilon^\alpha + b\epsilon^\beta \in \mathbf{PN}^K_\epsilon$, we have that $A-A=0\epsilon^\infty$ and $A \div A = 1 + 0\epsilon^\infty$ if and only if $\beta = \infty$.
+\end{proposition}
+
+\subsection{Exponentiation, Analytic Functions \& Asymptotic Series}
 
 The definition of $A^m$ for $A \in \mathbf{PN}^K_\epsilon$, $m \in \mathbb{Z}$ follows naturally from the above definitions of multiplication and division. \\
 Since we will generally consider $\epsilon$ to be small, we can extend any analytic function $h:K \rightarrow K$ to $h:\mathbf{PN}^K_{\epsilon} \rightarrow \mathbf{PN}^K_{\epsilon}$ for $\alpha \geq 0$. This is via Taylor series:
@@ -151,9 +165,7 @@ Since we will generally consider $\epsilon$ to be small, we can extend any analy
 $$h(a\epsilon^0+b\epsilon^\beta) = h(a+b\epsilon^\beta) = h(a) + b\epsilon^\beta h'(a) \quad$$
 $$h(a\epsilon^\alpha+b\epsilon^\beta) = h(0) + a\epsilon^\alpha h'(0) \quad where \quad \alpha \neq 0$$
 
-\subsection{Asymptotic Series}
-
-Consider an asymptotic series that is also a Hahn series; that is,
+Now, consider an asymptotic series that is also a Hahn series; that is,
 \begin{equation}
 S(z) = \sum_{n=1}^{\infty}a_nz^{\alpha_n} \quad as \quad z \rightarrow 0
 \end{equation}

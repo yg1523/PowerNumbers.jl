@@ -24,6 +24,8 @@ struct PowerNumber{T<:Number,V<:Number} <: Number
     PowerNumber{T,V}(A,B,α,β) where {T<:Number,V<:Number} = 
     if α > β 
         error("Must have α<=β") 
+    if α == -Inf
+        error("Must have α<=β") 
     elseif α == β 
         new{T,V}(A+B,0,β,β)
     elseif A == 0
@@ -102,6 +104,9 @@ end
 
 function inv(x::PowerNumber)
     a,b,α,β = apart(x),bpart(x),alpha(x),beta(x)
+    if α == Inf 
+        error("Not defined for α = Inf")
+    end
     α != β ? (return PowerNumber(1/a,-b*a^(-2),-α,β-2*α)) : (return PowerNumber(1/a,-β))
 end
 
