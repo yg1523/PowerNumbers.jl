@@ -3,10 +3,10 @@ module PowerNumbers
 using Base, DualNumbers, LinearAlgebra
 
 import Base: convert, *, +, -, ==, <, <=, >, !, !=, >=, /, ^, \, in, isapprox, promote_rule
-import Base: exp, atanh, log1p, abs, log, inv, real, imag, conj, sqrt, 
-                sin, cos, cbrt, abs2, log10, log2, exp, exp2, expm1, 
-                sin, cos, tan, sec, csc, cot, sind, cosd, tand, secd, cscd, cotd, asin, acos, 
-                atan, asec, acsc, acot, asind, acosd, atand, asecd, acscd, acotd, sinh, cosh, 
+import Base: exp, atanh, log1p, abs, log, inv, real, imag, conj, sqrt,
+                sin, cos, cbrt, abs2, log10, log2, exp, exp2, expm1,
+                sin, cos, tan, sec, csc, cot, sind, cosd, tand, secd, cscd, cotd, asin, acos,
+                atan, asec, acsc, acot, asind, acosd, atand, asecd, acscd, acotd, sinh, cosh,
                 tanh, sech, csch, coth, asinh, acosh, asech, acsch, acoth, deg2rad, rad2deg,
                 zero, isless, sign
 
@@ -21,12 +21,12 @@ struct PowerNumber{T<:Number,V<:Number} <: Number
     B::T
     α::V
     β::V
-    PowerNumber{T,V}(A,B,α,β) where {T<:Number,V<:Number} = 
-    if α > β 
-        error("Must have α<=β") 
-    if α == -Inf
-        error("Must have α<=β") 
-    elseif α == β 
+    PowerNumber{T,V}(A,B,α,β) where {T<:Number,V<:Number} =
+    if α > β
+        error("Must have α<=β")
+    elseif α == -Inf
+        error("Must have α<=β")
+    elseif α == β
         new{T,V}(A+B,0,β,β)
     elseif A == 0
         new{T,V}(B,0,β,β)
@@ -43,7 +43,7 @@ PowerNumber(a) = PowerNumber(a,0,zero(a),Inf)
 PowerNumber{T,V}(z::PowerNumber) where {T,V} = PowerNumber{T,V}(convert(T, z.A), convert(T, z.B), convert(V, z.α), convert(V, z.β))
 PowerNumber{T,V}(a) where {T,V} = PowerNumber(convert(T,a),zero(T),zero(V),convert(V,Inf))
 
-promote_rule(::Type{T}, ::Type{PowerNumber{V,W}}) where {T,V,W} = 
+promote_rule(::Type{T}, ::Type{PowerNumber{V,W}}) where {T,V,W} =
     promote_type(PowerNumber{promote_type(T,V),W})
 
 const ϵ = PowerNumber(1,1)
@@ -59,7 +59,7 @@ dual(x::PowerNumber) = Dual(x)
 
 zero(x::PowerNumber) = PowerNumber(zero(x.A), zero(x.B), x.α, x.β)
 
-function (x::PowerNumber)(ε) 
+function (x::PowerNumber)(ε)
     a,b,α,β = apart(x),bpart(x),alpha(x),beta(x)
     a*ε^α + b*ε^β
 end
@@ -79,10 +79,9 @@ function +(x::PowerNumber, y::PowerNumber)
         return PowerNumber(a,c,α,γ)
     elseif γ ≈ α
         return PowerNumber(a+c,b,α,β)
-    else 
+    else
         return PowerNumber(c,a,γ,α)
     end
-
 end
 
 +(x::PowerNumber, y::Number) = x + PowerNumber(y,0,0,Inf)
@@ -104,7 +103,7 @@ end
 
 function inv(x::PowerNumber)
     a,b,α,β = apart(x),bpart(x),alpha(x),beta(x)
-    if α == Inf 
+    if α == Inf
         error("Not defined for α = Inf")
     end
     α != β ? (return PowerNumber(1/a,-b*a^(-2),-α,β-2*α)) : (return PowerNumber(1/a,-β))
@@ -123,13 +122,13 @@ end
 sqrt(z::PowerNumber) = z^0.5
 cbrt(z::PowerNumber) = z^(1/3)
 
-==(a::PowerNumber, b::PowerNumber) = apart(a) == apart(b) && bpart(a) == bpart(b) && 
+==(a::PowerNumber, b::PowerNumber) = apart(a) == apart(b) && bpart(a) == bpart(b) &&
                                     alpha(a) == alpha(b) && beta(a) == beta(b)
 
 ==(a::Number, b::PowerNumber) = PowerNumber(a) == b
 ==(a::PowerNumber, b::Number) = a == PowerNumber(b)
 
-isapprox(a::PowerNumber, b::PowerNumber; opts...) = ≈(apart(a), apart(b); opts...) && ≈(bpart(a), bpart(b); opts...) && 
+isapprox(a::PowerNumber, b::PowerNumber; opts...) = ≈(apart(a), apart(b); opts...) && ≈(bpart(a), bpart(b); opts...) &&
                                                 ≈(alpha(a), alpha(b); opts...) && ≈(beta(a), beta(b); opts...)
 
 function log(z::PowerNumber{T,V}) where {T,V}
@@ -147,9 +146,9 @@ for op in (:real, :imag, :conj)
     @eval $op(l::PowerNumber) = PowerNumber($op(apart(l)), $op(bpart(l)), alpha(l), beta(l))
 end
 
-functionlist = (:abs, :abs2, :log10, :log2, :exp, :exp2, :expm1, 
-                :sin, :cos, :tan, :sec, :csc, :cot, :sind, :cosd, :tand, :secd, :cscd, :cotd, :asin, :acos, 
-                :atan, :asec, :acsc, :acot, :asind, :acosd, :atand, :asecd, :acscd, :acotd, :sinh, :cosh, 
+functionlist = (:abs, :abs2, :log10, :log2, :exp, :exp2, :expm1,
+                :sin, :cos, :tan, :sec, :csc, :cot, :sind, :cosd, :tand, :secd, :cscd, :cotd, :asin, :acos,
+                :atan, :asec, :acsc, :acot, :asind, :acosd, :atand, :asecd, :acscd, :acotd, :sinh, :cosh,
                 :tanh, :sech, :csch, :coth, :asinh, :acosh, :asech, :acsch, :acoth, :deg2rad, :rad2deg)
 
 for op in functionlist
@@ -185,7 +184,7 @@ function isless(w::Real, z::PowerNumber{T}) where T
     isless(w,a)
 end
 
-function Base.show(io::IO, x::PowerNumber) 
+function Base.show(io::IO, x::PowerNumber)
     if x.α == x.β || iszero(x.B)
         @assert iszero(x.B)
         if iszero(x.α)
