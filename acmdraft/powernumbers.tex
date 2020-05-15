@@ -57,8 +57,6 @@
 
 \section{Introduction}
 
-Asymptotic expansions are important computational tools in applied mathematics, that can reduce complicated functions to simple forms with specified accuracy. 
-
 {\it Dual numbers} are a simple algebraic structure that underlies forward mode automatic-differentiation, with a convenient representation in terms of $2 \times 2$ matrices:
 
 \begin{definition}
@@ -70,25 +68,27 @@ a + b \epsilon \qquad \hbox{where} \qquad \epsilon = \begin{pmatrix} 0 & 1 \\ & 
 $$
 \end{definition}
 
-The property that $\epsilon^2 = 0 $ suffices to guarante that general analytic matrix functions applied to dual numbers encode the derivative at the point $a$, namely:
+The property that $\epsilon^2 = 0 $ suffices to guarantee that general analytic matrix functions applied to dual numbers encode the derivative at the point $a$, namely:
 $$
 f(a + b \epsilon) = f(a) + b f'(b) \epsilon
 $$
-Thus any (?)
 
-\section{Outline}
-In analogy to dual numbers, we seek a simple algebraic structure that encodes the leading-order information of Hahn-form asymptotic expansions. These $S\in \mathbb{S}$ are of the form:
-$$S(z) = \sum_{n=1}^{\infty}a_nz^{\alpha_n} \quad as \quad z \rightarrow 0$$
-where the $\alpha_n \in \mathbb{R}$ are strictly increasing.
+Thus computations using dual numbers preserve the most important information  encoded in the Taylor Expansion. 
+
+In analogy to dual numbers, we seek a simple algebraic structure that encodes the leading-order information of Hahn-form asymptotic expansions. Asymptotic expansions are important computational tools in applied mathematics, that can reduce complicated functions to simple forms with specified accuracy. Many such expansions are of the Hahn form:
+\begin{equation}
+S(z) = \sum_{n=1}^{\infty}a_nz^{\alpha_n} \quad as \quad z \rightarrow 0
+\end{equation}
+where the $\alpha_n \in \mathbb{R}$ are strictly increasing. We we call the set of all such expansions $\mathbb{S}$.
 
 By restricting these series to the terms most significant in the limit, we can define the set of \textbf{power numbers}. Specifically, we will be restricting to the first two terms with $\alpha \leq \beta$, so that we are essentially considering:
 $$S(z) = az^\alpha + bz^\beta + o(z^\beta)$$
 
 By giving algebraic rules that are consistent with their counterparts in $\mathbb{S}$, we will allow for fast manipulation without compromising on accuracy or losing important order information. 
 
-In \textbf{Section 3} we will rigorously describe the algorithms that govern the basic operations on power numbers. These have been defined to correspond with what we expect from similar operations on $\mathbb{S}$, and we provide a theorem guaranteeing this symmetry.
+In \textbf{Section 2} we will rigorously describe the algorithms that govern the basic operations of addition, subtraction, multiplication and division on power numbers. These have been defined to correspond with what we expect from similar operations on $\mathbb{S}$, and we provide a theorem guaranteeing this symmetry. Furthermore, this guarantee extends to exponentiation and analytic functions of power numbers.
 
-In \textbf{Section 4} we will give some of the possible applications of the construction, including the evaluation of rational polynomials at infinity and finding limiting expressions of hypergeometric functions(?). We also provide an implementation written in the Julia language, "PowerNumbers.jl".
+In \textbf{Section 3} we will give some of the possible applications of the construction, including the evaluation of rational polynomials at infinity and finding limiting expressions of hypergeometric functions(?). We also provide an implementation written in the Julia language, "PowerNumbers.jl".
 
 \section{Formal Description}
 
@@ -98,9 +98,7 @@ $$\mathbf{PN}^K = \{a\epsilon^\alpha + b\epsilon^\beta : a,b \in K;\alpha,\beta\
 is called the set of \textbf{power numbers}. 
 \end{definition}
 
-
-
-In the case $\alpha=\beta$, we write only one term $(a+b)\epsilon^\beta$. Notationally, $\epsilon^0$ is omitted. While we do not have a one-to-one correspondence between $\mathbf{PN}^K$ and $\mathbb{S}$ (there is usually a choice between one or two terms), this is not a major concern.
+In the case $\alpha=\beta$, we write only one term $(a+b)\epsilon^\beta$. Notationally, $\epsilon^0$ is omitted. While we do not have a one-to-one correspondence between $\mathbf{PN}^K$ and $\mathbb{S}$ (there is usually a choice between one or two terms), this is not a major concern. Power numbers are not considered to be equal unless the values $(a,b,\alpha,\beta)$ are all equal.
 
 We enforce the equality $0\epsilon^\alpha + b\epsilon^\beta = b\epsilon^\beta$. However, in general, $a\epsilon^\alpha + 0\epsilon^\beta \neq a\epsilon^\alpha$.
 By defining $(+,*)$ below, we acquire the double monoid $$\mathbb{PN}^K = (\mathbf{PN}^K,+,*)$$
@@ -209,12 +207,7 @@ Since we will generally consider $\epsilon$ to be small, we can extend any analy
 $$h(a\epsilon^0+b\epsilon^\beta) = h(a+b\epsilon^\beta) = h(a) + b\epsilon^\beta h'(a) \quad$$
 $$h(a\epsilon^\alpha+b\epsilon^\beta) = h(0) + a\epsilon^\alpha h'(0) \quad where \quad \alpha \neq 0$$
 
-Now, consider an asymptotic series that is also a Hahn series; that is,
-\begin{equation}
-S(z) = \sum_{n=1}^{\infty}a_nz^{\alpha_n} \quad as \quad z \rightarrow 0
-\end{equation}
-where the $\alpha_n \in \mathbb{R}$ are strictly increasing.
-The primary significance of Power Numbers comes from the following 
+Now, consider an asymptotic series $S(z)$ that is also a Hahn series \textit{ie} $S \in \mathbb{S}$ as in (1). The primary significance of Power Numbers comes from the following 
 \begin{proposition}
 	Let $f(z) = az^\alpha + bz^\beta + o(z^\beta)$,	$g(z) = cz^\gamma + dz^\delta + o(z^\delta)$ be series of the form in $(1)$.
 	Define the associated Power Numbers, $F = a\epsilon^\alpha + b\epsilon^\beta$, $G = c\epsilon^\gamma + d\epsilon^\delta$.
