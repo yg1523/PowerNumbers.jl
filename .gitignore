@@ -3,3 +3,4 @@
 *.log
 *.synctex(busy)
 *.gz
+Manifest.toml

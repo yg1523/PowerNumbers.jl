@@ -49,6 +49,8 @@ end
     ε = PowerNumber(1,1)
     @test sin(sqrt(ε))^2 === PowerNumber(1.0,1.0)
     @test sin(sqrt(ε))^2.0 === PowerNumber(1.0,1.0)
+    @test sin(ε)/ε === PowerNumber(1.0,0.0,0,0)
+    @test sin(sqrt(ε))/sqrt(ε) === PowerNumber(1.0,0.0,0.0,0.0)
 end
 
 @testset "LogNumber" begin
@@ -82,13 +84,13 @@ end
     @test (a^4+a^2-a) == (p^4+p^2-p)(0)
 end
 
-z/(1-z) |> typeof
+
 
 #0.19999999999999996, 0.10000000000000009, 1.3, 1.0 + (-1.0)ϵ^1.0 + o(ϵ^1.0)
 #(HypergeometricFunctions._₂F₁general)(0.10000000000000009, 0.19999999999999996, 1.3, 1.0 + (-1.0)ϵ^1.0 + o(ϵ^1.0))
 #(HypergeometricFunctions._₂F₁Inf)(0.10000000000000009, 1.1, 1.3, (-1.0)ϵ^-1.0 + (1.0)ϵ^0.0 + o(ϵ^0.0))
 #(HypergeometricFunctions.AInf)(0.10000000000000009, 1.1, 1.3, (-1.0)ϵ^1.0 + (-1.0)ϵ^2.0 + o(ϵ^2.0), 1, 0.0)
 #z = (-1.0)ϵ^1.0 + (-1.0)ϵ^2.0 + o(ϵ^2.0)
-z = PowerNumber(-1.,-1.,1.,2.)
-@enter (HypergeometricFunctions.BInf)(0.10000000000000009, 1.1, 1.3, z, 1, 0.0)
-@enter (HypergeometricFunctions.recInfβ₀)(0.10000000000000009, 1.1, 1.3, z, 1, 0.0)
+# z = PowerNumber(-1.,-1.,1.,2.)
+# @enter (HypergeometricFunctions.BInf)(0.10000000000000009, 1.1, 1.3, z, 1, 0.0)
+# @enter (HypergeometricFunctions.recInfβ₀)(0.10000000000000009, 1.1, 1.3, z, 1, 0.0)
