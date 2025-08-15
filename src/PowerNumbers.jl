@@ -16,22 +16,27 @@ export PowerNumber, LogNumber, ϵ
 
 include("LogNumber.jl")
 
+
+"""
+    PowerNumber(A, B, α, β)
+
+represents a power series of the form `A*ε^α + B*ϵ^β + o(ϵ^β)` where `α ≤ β`.
+"""
 struct PowerNumber{T<:Number,V<:Number} <: Number
     A::T
     B::T
     α::V
     β::V
-    PowerNumber{T,V}(A,B,α,β) where {T<:Number,V<:Number} =
-    if α > β
-        error("Must have α<=β")
-    elseif α == -Inf
-        error("Must have α<=β")
-    elseif α == β
-        new{T,V}(A+B,0,β,β)
-    elseif A == 0
-        new{T,V}(B,0,β,β)
-    else
-        new{T,V}(A,B,α,β)
+    function PowerNumber{T,V}(A,B,α,β) where {T<:Number,V<:Number}
+        α > β && error("Must have α ≤ β")
+        α == -Inf && error("Must have α≤ β")
+        if α == β
+            new{T,V}(A+B,0,β,β)
+        elseif A == 0
+            new{T,V}(B,0,β,β)
+        else
+            new{T,V}(A,B,α,β)
+        end
     end
 end
 
@@ -133,7 +138,8 @@ isapprox(a::PowerNumber, b::PowerNumber; opts...) = ≈(apart(a), apart(b); opts
 
 function log(z::PowerNumber{T,V}) where {T,V}
     a,b,α,β = apart(z),bpart(z),alpha(z),beta(z)
-    a != 0 ? (return LogNumber(promote(α, log(a))...)) : error("Cannot evaluate log at 0")
+    iszero(a) && error("Cannot evaluate log at 0")
+    LogNumber(promote(α, log(a))...)
 end
 
 log1p(z::PowerNumber) = log(z+1)

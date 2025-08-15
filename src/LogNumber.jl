@@ -1,8 +1,14 @@
-# represents s*log(ε) + c as ε -> 0
+"""
+    LogNumber(s, c)
+
+represents s*log(ε) + c as ε -> 0
+"""
 struct LogNumber{T} <: Number
     s::T
     c::T
 end
+
+LogNumber(s, t) = LogNumber(promote(s, t)...)
 
 
 #@inline logpart(z::Number) = zero(z)
